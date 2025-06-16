@@ -1,0 +1,57 @@
+TM_STRIP_WHITESPACE_ON_SAVE = true
+runRubocop = true
+
+softTabs = true
+tabeSize = 2
+
+include = '{$include,.codeclimate.yml,.dockerignore,.editorconfig,.github,.gitignore,.gitattributes,.semaphore,.tm_properties,.goreleaser.yml,.ruby-*,.rspec*,.rubocop*.yml,.foreman,.env*,.gitlab-ci.yml,.prettierrc.json,.eslintrc.cjs,.yarnrc*,.travis.yml,.circleci,.cirrus.yml,.azure-pipelines,.standard*.yml,.pryrc,.pre-commit-config.yaml,.annotaterb.yml,.clang-format,.credo.exs,.tool-versions,.yamllint.yaml,.formatter.exs,.sops.yaml,.terraform-version,.stow-local-ignore}'
+exclude = '{$exclude,yarn.lock,node_modules,.git}'
+
+[*]
+softTabs = true
+tabeSize = 2
+
+[*_spec.rb]
+fileType = source.ruby.rspec
+
+[*.tm_lang.rb]
+fileType = source.ruby.tm_grammar
+
+[*.jbuilder]
+fileType = source.ruby.rails
+
+[*.arb]
+fileType = source.ruby.rails
+
+[*.rbs]
+fileType = source.ruby
+
+[*.rbi]
+fileType = source.ruby
+
+[text.git-commit]
+wrapColumn = 70
+
+[*.d]
+softTabs = true
+tabeSize = 4
+
+[source.c]
+softTabs = true
+tabeSize = 4
+
+[source.makefile]
+softTabs = false
+tabeSize = 4
+
+[*.cjs]
+fileType = source.js
+
+[*.apinotes]
+fileType = source.yaml
+
+[*.d.cg]
+fileType = source.d
+
+[*.dt]
+fileType = source.dtrace
