@@ -1,0 +1,71 @@
+[color]
+	diff  = auto
+	status= auto
+	branch= auto
+	interactive = true
+
+[alias]
+	ci = commit
+	di = diff --color-words
+	st = status
+	co = checkout
+	addremove = "!sh -c 'git add .; git ls-files --deleted | xargs git rm'"
+	undo = checkout
+	unstage = reset
+	sync = "!sh -c 'git fetch upstream; git rebase upstream/master; git push origin master'"
+	fpush = push --force-with-lease
+  first-commit = "!sh -c 'git rev-list --ancestry-path $(git merge-base master $(git branch --show-current))..$(git branch --show-current) --reverse | head -1'"
+  fc = first-commit
+  cb = branch --show-current
+  rebase-branch = "!sh -c 'git rebase -i $(git first-commit)^'"
+  rb = rebase-branch
+
+[core]
+	editor = mate -w
+	excludesfile = ~/.gitignore
+  pager = delta
+  sshCommand = ssh -i ~/.ssh/id_ed25519_personal -F /dev/null
+[push]
+	default = simple
+[rebase]
+	autosquash = true
+[init]
+	defaultBranch = master
+[pull]
+	ff = only
+[merge]
+	conflictstyle = diff3
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true  # use n and N to move between diff sections
+	light = false    # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+  line-numbers = true
+  side-by-side = true
+
+[diff]
+	colorMoved = default
+
+[includeIf "gitdir:~/development/apoex/"]
+  path = ~/development/apoex/.gitconfig
+
+[includeIf "gitdir:~/development/doobnet/"]
+  path = ~/development/doobnet/.gitconfig
+
+[includeIf "gitdir:~/development/"]
+  path = ~/development/.gitconfig
+
+[includeIf "gitdir:~/.rvm/gems/"]
+  path = ~/.rvm/gems/.gitconfig
+
+[rerere]
+	enabled = true
+	autoUpdate = true
+[diff "sops"]
+  textconv = sops -d
+  cachetextconv = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
