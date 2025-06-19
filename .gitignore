@@ -1,1 +1,6 @@
 dot-config/fish/extra.fish
+
+dot-config/zed/.tmp*
+dot-config/zed/conversations
+dot-config/zed/embeddings
+dot-config/zed/prompts
