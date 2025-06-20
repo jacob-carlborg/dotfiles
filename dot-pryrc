@@ -1,0 +1,23 @@
+require 'digest/md5'
+require 'fileutils'
+
+#Pry.config.editor = proc { |file, line| "mate -w #{file} -l #{line}" }
+Pry.config.editor = "mate"
+
+def alias_command (command, alias_)
+  if Pry.commands.include?(command)
+    Pry.commands.alias_command alias_, command
+  end
+end
+
+alias_command "continue", 'c'
+alias_command "step", 'c'
+alias_command "next", 'n'
+alias_command "finish", 'f'
+
+Pry.config.commands.command "mate" do
+  FileUtils.mkdir_p(File.expand_path('~/tmp/pry'))
+  file = File.expand_path("~/tmp/pry/_#{Digest::MD5.hexdigest(FileUtils.pwd).to_s}.rb")
+  system "mate -w #{file}"
+  Object.class_eval(`cat #{file}`)
+end
