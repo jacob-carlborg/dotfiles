@@ -46,14 +46,14 @@
 [diff]
 	colorMoved = default
 
+[includeIf "gitdir:~/development/"]
+  path = ~/development/.gitconfig
+
 [includeIf "gitdir:~/development/apoex/"]
   path = ~/development/apoex/.gitconfig
 
 [includeIf "gitdir:~/development/doobnet/"]
   path = ~/development/doobnet/.gitconfig
-
-[includeIf "gitdir:~/development/"]
-  path = ~/development/.gitconfig
 
 [includeIf "gitdir:~/.rvm/gems/"]
   path = ~/.rvm/gems/.gitconfig
