@@ -85,4 +85,6 @@ set PATH /opt/homebrew/bin /usr/local/bin $PATH /sbin /usr/sbin
 # This won't be added again if you remove it.
 source ~/.orbstack/shell/init.fish 2>/dev/null || :
 
-source ./extra.fish
+if test -f ~/.config/fish/extra.fish
+  source ~/.config/fish/extra.fish
+end
