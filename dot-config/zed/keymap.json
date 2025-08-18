@@ -27,6 +27,7 @@
     "bindings": {
       "1": "git::Diff",
       "2": "git::Commit",
+      "3": "git::Amend",
       "4": "git::Push",
       "5": "git::Pull"
     }
@@ -48,7 +49,7 @@
   {
     "context": "Editor",
     "bindings": {
-      "cmd-shift-7": ["editor::ToggleComments", { "advance_downwards": false }]
+      "cmd-/": ["editor::ToggleComments", { "advance_downwards": false }]
       // "shift-enter": null
       // "j k": ["workspace::SendKeystrokes", "escape"]
     }
