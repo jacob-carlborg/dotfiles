@@ -8,7 +8,6 @@
 	ci = commit
 	di = diff --color-words
 	st = status
-	co = checkout
 	addremove = "!sh -c 'git add .; git ls-files --deleted | xargs git rm'"
 	undo = checkout
 	unstage = reset
@@ -21,6 +20,16 @@
   rb = rebase-branch
   ll = log --oneline -10
   sw = "!git branch --color=always | fzf --ansi --reverse  | sed 's/^[ *]*//' | xargs git switch"
+  co = "!f() { \
+    if [ \"$#\" -eq 0 ]; then \
+      git log --oneline --color=always | \
+        fzf --ansi --reverse | \
+        cut -f 1 -d ' ' | \
+        xargs git checkout; \
+    else \
+      git checkout \"$@\"; \
+    fi \
+  }; f"
 
 [core]
 	editor = mate -w
