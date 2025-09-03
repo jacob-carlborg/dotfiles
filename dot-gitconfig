@@ -19,7 +19,14 @@
   rebase-branch = "!sh -c 'git rebase -i $(git first-commit)^'"
   rb = rebase-branch
   ll = log --oneline -10
-  sw = "!git branch --color=always | fzf --ansi --reverse  | sed 's/^[ *]*//' | xargs git switch"
+
+  sw = "! \
+    git branch --color=always | \
+      fzf --ansi --reverse |    \
+      sed 's/^[ *]*//' |        \
+      xargs git switch          \
+  "
+
   co = "!f() { \
     if [ \"$#\" -eq 0 ]; then \
       git log --oneline --color=always | \
