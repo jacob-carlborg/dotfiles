@@ -27,15 +27,15 @@
       xargs git switch          \
   "
 
-  co = "!f() { \
-    if [ \"$#\" -eq 0 ]; then \
+  co = "!f() {                           \
+    if [ \"$#\" -eq 0 ]; then            \
       git log --oneline --color=always | \
-        fzf --ansi --reverse | \
-        cut -f 1 -d ' ' | \
-        xargs git checkout; \
-    else \
-      git checkout \"$@\"; \
-    fi \
+        fzf --ansi --reverse |           \
+        cut -f 1 -d ' ' |                \
+        xargs git checkout;              \
+    else                                 \
+      git checkout \"$@\";               \
+    fi                                   \
   }; f"
 
 [core]
