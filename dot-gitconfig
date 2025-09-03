@@ -20,6 +20,7 @@
   rebase-branch = "!sh -c 'git rebase -i $(git first-commit)^'"
   rb = rebase-branch
   ll = log --oneline -10
+  sw = "!git branch | fzf | sed 's/^[ *]*//' | xargs git switch"
 
 [core]
 	editor = mate -w
