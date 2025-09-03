@@ -55,6 +55,8 @@ function logs
     case 'aposuite-sb1'
       set environment 'aposuite-1'
       set context 'sandbox'
+    case 'kronoberg'
+      set context 'kronoberg'
     case '*'
       echo "Unrecognized environment: $env_context"
       return 1
