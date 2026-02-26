@@ -3,6 +3,7 @@ set -x EDITOR 'mate -w'
 set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 set -x DISABLE_SPRING true
 set -x USE_GKE_GCLOUD_AUTH_PLUGIN True
+set -x VITE_DEVTOOLS_EDITOR zed
 
 set fish_prompt_pwd_dir_length 0
 
