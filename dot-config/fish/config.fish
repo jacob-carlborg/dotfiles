@@ -82,7 +82,7 @@ rvm default
 # temporarily disable until DVM works again
 # dvm --version > /dev/null
 
-set PATH /opt/homebrew/bin /usr/local/bin $PATH /sbin /usr/sbin
+set PATH ~/.local/bin /opt/homebrew/bin /usr/local/bin $PATH /sbin /usr/sbin
 
 # Added by OrbStack: command-line tools and integration
 # This won't be added again if you remove it.
