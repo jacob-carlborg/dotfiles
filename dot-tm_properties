@@ -4,7 +4,7 @@ runRubocop = true
 softTabs = true
 tabeSize = 2
 
-include = '{$include,.codeclimate.yml,.dockerignore,.editorconfig,.github,.gitignore,.gitattributes,.semaphore,.tm_properties,.goreleaser.yml,.ruby-*,.rspec*,.rubocop*.yml,.foreman,.env*,.gitlab-ci.yml,.prettierrc.json,.eslintrc.cjs,.yarnrc*,.travis.yml,.circleci,.cirrus.yml,.azure-pipelines,.standard*.yml,.pryrc,.pre-commit-config.yaml,.annotaterb.yml,.clang-format,.credo.exs,.tool-versions,.yamllint.yaml,.formatter.exs,.sops.yaml,.terraform-version,.stow-local-ignore}'
+include = '{$include,.codeclimate.yml,.dockerignore,.editorconfig,.github,.gitignore,.gitattributes,.semaphore,.tm_properties,.goreleaser.yml,.ruby-*,.rspec*,.rubocop*.yml,.foreman,.env*,.gitlab-ci.yml,.prettierrc.json,.eslintrc.cjs,.yarnrc*,.travis.yml,.circleci,.cirrus.yml,.azure-pipelines,.standard*.yml,.pryrc,.pre-commit-config.yaml,.annotaterb.yml,.clang-format,.credo.exs,.tool-versions,.yamllint.yaml,.formatter.exs,.sops.yaml,.terraform-version,.stow-local-ignore,.eslintignore,.eslintrc.json}'
 exclude = '{$exclude,yarn.lock,node_modules,.git}'
 
 [*]
