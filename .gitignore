@@ -4,3 +4,7 @@ dot-config/zed/.tmp*
 dot-config/zed/conversations
 dot-config/zed/embeddings
 dot-config/zed/prompts
+
+dot-config/opencode/node_modules
+dot-config/opencode/package.json
+dot-config/opencode/bun.lock

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-opus-4-6",
+  "theme": "solarized",
+  "autoupdate": true,
+  "tui": {
+    "scroll_acceleration": {
+      "enabled": true
+    }
+  },
+  "experimental": {
+    "disable_paste_summary": true
+  },
+  "lsp": {
+    "ruby": {
+      "disabled": true
+    }
+  },
+  "mcp": {
+    "dos": {
+      "type": "remote",
+      "url": "http://localhost:5200/mcp",
+      "oauth": {
+        "clientId": "EiNjWOAzAR7_V4vu_ZCPwSFshKeoAW0LHzMcNzyd5ro",
+        "clientSecret": "4Ci6iyV2l3oH2G5bA3-6Bjgj9u8RP2-TN48HRAoewhg"
+      }
+    }
+  },
+  "permission": {
+    //"bash": "deny"
+    "bash": {
+      "git add": "deny",
+      "git commit": "deny",
+      "git push": "deny",
+      "git pull": "deny",
+      "git clone": "deny",
+      "git fetch": "deny",
+      "git reset": "deny",
+      "git checkout": "deny",
+      "git merge": "deny",
+      "git rebase": "deny",
+      "git stash": "deny",
+      "git log": "allow",
+      "git diff": "allow",
+      "git status": "allow"
+    }
+  }
+}
