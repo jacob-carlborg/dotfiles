@@ -76,6 +76,9 @@
 [includeIf "gitdir:~/.rvm/gems/"]
   path = ~/.rvm/gems/.gitconfig
 
+[includeIf "gitdir:~/Library/Application Support/TextMate/"]
+  path = "~/Library/Application Support/TextMate/.gitconfig"
+
 [rerere]
 	enabled = true
 	autoUpdate = true
