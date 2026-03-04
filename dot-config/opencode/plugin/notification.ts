@@ -56,6 +56,10 @@ export const NotificationPlugin: Plugin = async ({
         await notify("Agent is asking for permission", name);
       }
 
+      if (event.type === "question.asked") {
+        await notify("Agent is asking a question", name);
+      }
+
       if (event.type === "session.idle") {
         await notify("Agent is done", name);
       }
