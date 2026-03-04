@@ -9,14 +9,14 @@ export const NotificationPlugin: Plugin = async ({
 }) => {
   return {
     event: async ({ event }) => {
+      const name = project.name ?? project.worktree;
+
+      if (event.type === "permission.asked") {
+        await $`osascript -e 'display notification "${name}" with title "Agent is asking for permission"'`;
+      }
+
       if (event.type === "session.idle") {
-        const session = await client.get("/session/{id}", {
-          params: { path: { id: event.properties.sessionID } },
-        });
-        // Skip notifications for subagent sessions
-        if (session.data?.parentID) return;
-        // MacOS sounds can be found on /System/Library/Sounds
-        await $`osascript -e 'display notification "Agent is done" with title "opencode"'`;
+        await $`osascript -e 'display notification "${name}" with title "Agent is done"'`;
       }
     },
   };
