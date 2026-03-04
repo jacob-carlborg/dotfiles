@@ -48,6 +48,14 @@ export const NotificationPlugin: Plugin = async ({
     }
   }
 
+  async function isSubAgent(event: Event): boolean {
+    const session = await client
+      .session
+      .get({ path: { id: event.properties.sessionID }})
+
+    !!session.data.parentID
+  }
+
   return {
     event: async ({ event }) => {
       const name = project.name ?? project.worktree;
@@ -60,7 +68,7 @@ export const NotificationPlugin: Plugin = async ({
         await notify("Agent is asking a question", name);
       }
 
-      if (event.type === "session.idle") {
+      if (event.type === "session.idle" && !await isSubAgent(event)) {
         await notify("Agent is done", name);
       }
     },
