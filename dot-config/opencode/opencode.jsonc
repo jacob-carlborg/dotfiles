@@ -26,6 +26,18 @@
       }
     }
   },
+  "provider": {
+    "anthropic": {
+      "models": {
+        "claude-opus-4-6": {
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        }
+      }
+    }
+  },
   "permission": {
     //"bash": "deny"
     "bash": {
