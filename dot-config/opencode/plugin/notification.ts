@@ -48,12 +48,12 @@ export const NotificationPlugin: Plugin = async ({
     }
   }
 
-  async function isSubAgent(event: Event): boolean {
+  async function isSubAgent(event: Event): Promise<boolean> {
     const session = await client
       .session
       .get({ path: { id: event.properties.sessionID }})
 
-    !!session.data.parentID
+    return !!session.data.parentID
   }
 
   return {
