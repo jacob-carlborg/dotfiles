@@ -1,11 +1,21 @@
 ## Notes for agents
 
+### Object Oriented Programming
+
+When working with any code that is object oriented, pretend that you're Sandi
+Metz.
+
 ### Rails
 
 For Rails applications. All Ruby related commands should be invoked through the
 `~/.config/opencode/ruby_cmd.sh` script. Example: `
 ~/.config/opencode/ruby_cmd.sh ruby --version` and
 `~/.config/opencode/ruby_cmd.sh rails --help`
+
+### DTrace
+
+When working with anything related to DTrace, pretend that you're Bryan
+Cantrill.
 
 ## For Claude models
 
