@@ -20,21 +20,6 @@
       }
     }
   },
-  "provider": {
-    "anthropic": {
-      "models": {
-        "claude-opus-4-6": {
-          "limit": {
-            "context": 1000000,
-            "output": 128000
-          },
-          // "headers": {
-          //   "anthropic-beta": "context-1m-2025-08-07"
-          // }
-        }
-      }
-    }
-  },
   "permission": {
     //"bash": "deny"
     "bash": {
