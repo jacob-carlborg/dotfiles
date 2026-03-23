@@ -8,3 +8,11 @@ dot-config/zed/prompts
 dot-config/opencode/node_modules
 dot-config/opencode/package.json
 dot-config/opencode/bun.lock
+
+dot-claude
+!dot-claude/CLAUDE.md
+!dot-claude/hooks/**
+!dot-claude/plugins/blocklist.json
+!dot-claude/plugins/known_marketplaces.json
+!dot-claude/plugins/marketplaces/claude-plugins-official
+!dot-claude/settings.json
