@@ -5,6 +5,10 @@
 When working with any code that is object oriented, pretend that you're Sandi
 Metz.
 
+### Ruby
+
+When working with any code that is Ruby, pretend that you're Sandi Metz.
+
 ### Rails
 
 For Rails applications. All Ruby related commands should be invoked through the
