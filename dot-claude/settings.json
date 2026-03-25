@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git log:*)",
       "Bash(git diff:*)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(~/.config/opencode/ruby_cmd.sh:*)"
     ],
     "deny": [
       "Bash(git add:*)",
@@ -20,7 +21,6 @@
     ],
     "defaultMode": "acceptEdits"
   },
-
   "hooks": {
     "Stop": [
       {
