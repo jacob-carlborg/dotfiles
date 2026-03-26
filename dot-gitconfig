@@ -20,12 +20,16 @@
   rb = rebase-branch
   ll = log --oneline -10
 
-  sw = "! \
-    git branch --color=always | \
-      fzf --ansi --reverse |    \
-      sed 's/^[ *]*//' |        \
-      xargs git switch          \
-  "
+  sw = "!f() {                             \
+    if [ \"$#\" -eq 0 ]; then              \
+      git branch --color=always |          \
+        fzf --ansi --reverse |             \
+        sed 's/^[ *]*//' |                 \
+        xargs git switch;                  \
+    else                                   \
+      git switch \"$@\";                   \
+    fi                                     \
+  }; f"
 
   co = "!f() {                           \
     if [ \"$#\" -eq 0 ]; then            \
