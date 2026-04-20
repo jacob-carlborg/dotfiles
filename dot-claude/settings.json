@@ -1,12 +1,4 @@
 {
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline.sh"
-  },
-  "sandbox": {
-    "enabled": true,
-    "autoAllowBashIfSandboxed": true
-  },
   "permissions": {
     "allow": [
       "Bash(git log:*)",
@@ -27,7 +19,7 @@
       "Bash(git rebase:*)",
       "Bash(git stash:*)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "auto"
   },
   "hooks": {
     "Stop": [
@@ -42,6 +34,10 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
@@ -49,5 +45,10 @@
         "url": "https://github.com/anthropics/claude-plugins-official.git"
       }
     }
-  }
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "skipAutoPermissionPrompt": true
 }
