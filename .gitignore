@@ -16,3 +16,4 @@ dot-claude
 !dot-claude/plugins/known_marketplaces.json
 !dot-claude/plugins/marketplaces/claude-plugins-official
 !dot-claude/settings.json
+!dot-claude/skills
