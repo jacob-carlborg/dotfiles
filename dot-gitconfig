@@ -86,9 +86,6 @@
 [rerere]
 	enabled = true
 	autoUpdate = true
-[diff "sops"]
-  textconv = sops -d
-  cachetextconv = false
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
