@@ -19,6 +19,8 @@
   rebase-branch = "!sh -c 'git rebase -i $(git first-commit)^'"
   rb = rebase-branch
   ll = log --oneline -10
+  merged-branches = "!git branch --merged master | grep -v '^[* ]*master$'"
+  mb = merged-branches
 
   sw = "!f() {                             \
     if [ \"$#\" -eq 0 ]; then              \
