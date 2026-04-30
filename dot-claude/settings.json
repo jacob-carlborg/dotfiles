@@ -52,5 +52,8 @@
     "enabled": false,
     "autoAllowBashIfSandboxed": true
   },
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "enabledPlugins": {
+    "ruby-lsp@claude-plugins-official": true
+  }
 }
