@@ -2,6 +2,14 @@
 input=$(cat)
 MODEL=$(echo "$input" | jq -r '.model.display_name')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
+TOKENS=$(echo "$input" | jq -r '
+  [
+    .context_window.used_tokens // empty,
+    ((.context_window.total_input_tokens // 0) + (.context_window.total_output_tokens // 0)),
+    0
+  ] | map(select(. != null)) | .[0]
+')
+TOKENS_FMT=$(printf "%'d" "$TOKENS" 2>/dev/null || echo "$TOKENS")
 
 FILLED=$((PCT / 10))
 EMPTY=$((10 - FILLED))
@@ -18,4 +26,4 @@ else
 fi
 RESET="\033[0m"
 
-echo -e "[$MODEL] ${COLOR}${BAR} ${PCT}%${RESET}"
+echo -e "[$MODEL] ${COLOR}${BAR} ${PCT}% (${TOKENS_FMT} tokens)${RESET}"
