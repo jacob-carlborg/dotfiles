@@ -40,6 +40,11 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
+  "preferredNotifChannel": "notifications_disabled",
+  "enabledPlugins": {
+    "ruby-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true
+  },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
@@ -52,8 +57,5 @@
     "enabled": false,
     "autoAllowBashIfSandboxed": true
   },
-  "skipAutoPermissionPrompt": true,
-  "enabledPlugins": {
-    "ruby-lsp@claude-plugins-official": true
-  }
+  "skipAutoPermissionPrompt": true
 }
