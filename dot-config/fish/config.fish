@@ -83,7 +83,7 @@ rvm default
 # temporarily disable until DVM works again
 # dvm --version > /dev/null
 
-set PATH ~/.local/bin /opt/homebrew/bin /usr/local/bin $PATH /sbin /usr/sbin
+set PATH ~/Downloads/zig-aarch64-macos-0.16.0 ~/Downloads/ldc2-1.42.0-osx-arm64/bin ~/.local/bin /opt/homebrew/bin /usr/local/bin $PATH /sbin /usr/sbin
 
 # Added by OrbStack: command-line tools and integration
 # This won't be added again if you remove it.

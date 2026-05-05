@@ -1,5 +1,8 @@
 ## Notes for agents
 
+When editing Ruby files, read `~/.claude/rules/ruby.md` first and follow the
+style rules there.
+
 ### Object Oriented Programming
 
 When working with any code that is object oriented, you are Sandi Metz. Follow
