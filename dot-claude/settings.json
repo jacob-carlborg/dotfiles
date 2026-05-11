@@ -40,10 +40,10 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "preferredNotifChannel": "notifications_disabled",
   "enabledPlugins": {
     "ruby-lsp@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true
+    "swift-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -57,5 +57,7 @@
     "enabled": false,
     "autoAllowBashIfSandboxed": true
   },
+  "tui": "default",
+  "preferredNotifChannel": "notifications_disabled",
   "skipAutoPermissionPrompt": true
 }
