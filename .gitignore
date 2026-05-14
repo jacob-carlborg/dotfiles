@@ -12,6 +12,8 @@ dot-config/opencode/bun.lock
 dot-claude/*
 !dot-claude/
 !dot-claude/CLAUDE.md
+!dot-claude/commands/
+!dot-claude/commands/**
 !dot-claude/hooks/
 !dot-claude/hooks/**
 !dot-claude/plugins/blocklist.json
