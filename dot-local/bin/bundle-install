@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+source "$HOME/.rvm/scripts/rvm"
+set -euo pipefail
+
+set +u; rvm use . >/dev/null; set -u
+
+CONTRIBSYS_SERVICE="bundle-enterprise-contribsys"
+GITHUB_PACKAGES_SERVICE="bundle-rubygems-pkg-github"
+
+read_keychain() {
+  local service="$1"
+  if ! security find-generic-password -s "$service" -w 2>/dev/null; then
+    echo "error: no keychain entry for service '$service'" >&2
+    echo "       add with: security add-generic-password -s '$service' -a \"\$USER\" -w '<token>'" >&2
+    exit 1
+  fi
+}
+
+export BUNDLE_ENTERPRISE__CONTRIBSYS__COM="$(read_keychain "$CONTRIBSYS_SERVICE")"
+export BUNDLE_RUBYGEMS__PKG__GITHUB__COM="$(read_keychain "$GITHUB_PACKAGES_SERVICE")"
+
+exec bundle install "$@"
