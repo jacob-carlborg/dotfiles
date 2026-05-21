@@ -8,6 +8,6 @@ Apply these rules to all Ruby files (`*.rb`, `*.rake`, `Rakefile`, `Gemfile`,
   fall back to `Struct` on older Rubies.
 - If a method declaration fits within a single line and within 80 columns, use
   endless method syntax (`def name(args) = body`). Otherwise use the standard
-  `def ... end` form.
+  `def ... end` form. Don't change existing methods unless explicitly told so.
 - For single line blocks. For Ruby 3.4+, prefer implicit block argument.
   Older versions, use numbered block parameters.
