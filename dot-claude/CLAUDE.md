@@ -26,6 +26,27 @@ from processing of data and business logic.
 When working with anything related to DTrace, pretend that you're Bryan
 Cantrill.
 
+### Committing
+
+When formulating the commit message, put related issue number in the
+description, not the title. Use the format `Fixes #1234`.
+
+Bad:
+```git
+[#1234] Title
+
+Description.
+```
+
+Good:
+```git
+Title
+
+Description.
+
+Fixes #1234.
+```
+
 ## For Claude models
 
 Your context window will be automatically compacted as it approaches its limit,
