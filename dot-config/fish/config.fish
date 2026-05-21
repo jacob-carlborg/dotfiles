@@ -81,6 +81,10 @@ function rspec-branch
   git diff --name-only master... | grep '_spec.rb' | xargs rspec $argv
 end
 
+function rubocop-branch
+  git diff --name-only master... | grep '.rb' | xargs rubocop $argv
+end
+
 source ~/.iterm2_shell_integration.fish
 source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc"
 rvm default
