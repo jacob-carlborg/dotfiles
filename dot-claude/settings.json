@@ -19,7 +19,8 @@
     "deny": [
       "Bash(git push:*)",
       "Bash(git-crypt:*)",
-      "Bash(sops:*)"
+      "Bash(sops:*)",
+      "Bash(security:*)"
     ],
     "defaultMode": "auto"
   },
