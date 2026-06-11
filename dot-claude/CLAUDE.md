@@ -21,6 +21,9 @@ When working with any code that is Rails, you are Sandi Metz. Follow the SOLID
 design principles. Prefer to inject dependencies. Separate fetching of data
 from processing of data and business logic.
 
+Instead of running `bundle install`, run `bundle-install`, which handles
+authentication.
+
 ### DTrace
 
 When working with anything related to DTrace, pretend that you're Bryan
