@@ -124,11 +124,69 @@ responsible for the code; you're responsible for not making it worse.
 
 Apply fixes one thread at a time so each diff is reviewable. After each fix:
 - Re-run the relevant tests / type-check / linter for that file.
-- Note which thread the change addresses (you'll need this for the report).
+- Commit the fix as a fixup commit targeting the commit that originally
+    introduced the code the comment points at (see below).
+- Note which thread the change addresses and the fixup commit SHA (you'll
+    need both for the report).
 
 If fixing one comment would conflict with another comment (reviewers sometimes
 disagree), stop and ask the user which direction to take — don't silently pick
 a side.
+
+### Committing each fix as a fixup
+
+Each fix becomes a `git commit --fixup=<target>` so the user can later run
+`git rebase -i --autosquash` and fold every fix into the commit it amends.
+Follow the same routing rules as the `fixup` skill (read
+`~/.claude/skills/fixup/SKILL.md` for the full hunk-splitting and patch
+mechanics); the short version:
+
+1. **Determine the fixup-eligible range.** Only the PR's own commits are valid
+    targets:
+
+    ```sh
+    git merge-base HEAD origin/<baseRefName>
+    ```
+
+    Commits after the merge-base are eligible. If blame points at or before
+    the merge-base, the code predates the PR — don't create a fixup; report
+    the thread and ask the user (the comment may really be asking for a new
+    standalone commit).
+
+2. **Find the target commit.** The comment itself anchors you: blame the
+    lines the comment points at (and that your fix modifies), as they were
+    before your fix:
+
+    ```sh
+    git blame -L <start>,<end> --porcelain HEAD -- <path>
+    ```
+
+    The comment's `commit_id` is *not* the target — it's just the head SHA the
+    reviewer saw. Blame tells you which PR commit actually introduced the
+    lines.
+
+3. **Resolve fixup chains.** If blame lands on an earlier `fixup! …` commit,
+    walk to the commit it ultimately fixes up and target that, so autosquash
+    collapses everything into one place.
+
+4. **Stage only this thread's fix and commit:**
+
+    ```sh
+    git add <files touched by this fix>   # or git apply --cached a per-hunk patch
+    git commit --fixup=<target_sha>
+    ```
+
+    One fixup commit per thread. If a single thread's fix spans lines from
+    multiple PR commits, split it into one fixup per target (per the `fixup`
+    skill's hunk-splitting steps).
+
+5. **Pure additions** (new files, new methods with no blamable old lines):
+    blame the surrounding context lines to pick the target. If that's
+    ambiguous, ask the user rather than guessing.
+
+Let pre-commit hooks run (no `--no-verify`); if a hook fails, surface the
+failure. Don't run the autosquash rebase yourself — leave the fixup commits
+for the user to review and rebase.
 
 
 ## Step 6 — report back
@@ -137,8 +195,8 @@ Produce a concise table the user can scan:
 
 ```
 Thread                              | Verdict         | Action
-------------------------------------+-----------------+-------------------------
-src/auth.ts:42 (alice)              | valid bug       | fixed (commit pending)
+------------------------------------+-----------------+----------------------------------
+src/auth.ts:42 (alice)              | valid bug       | fixup d4e5f6a → abc1234 "Add auth"
 src/auth.ts:88 (bob)                | wrong — see note| pushback drafted
 README.md:12 (alice)                | nit             | skipped
 PR review body (carol)              | question        | answer drafted
@@ -147,6 +205,15 @@ PR review body (carol)              | question        | answer drafted
 Then list, for each "pushback drafted" or "answer drafted" item, the exact text
 you'd post, so the user can review-and-send. Do not post anything to GitHub
 yourself unless the user explicitly told you to.
+
+If any fixup commits were created, end with the follow-up command:
+
+```sh
+git rebase -i --autosquash <merge-base>
+```
+
+…using the merge-base from Step 5 (or its parent, so the oldest target is in
+the rebase todo). Don't run it yourself.
 
 
 ## Replying on GitHub (only if asked)
@@ -176,6 +243,13 @@ Don't resolve threads programmatically — let the user (or the reviewer) do tha
 - **Bundling unrelated fixes.** Each comment is its own thread; don't sneak
     refactors into the fix commit. The reviewer will look for the specific change
     they asked for.
+- **Sweeping pre-existing dirt into a fixup.** If the working tree was dirty
+    before you started fixing, those changes must not ride along in your fixup
+    commits. Stage per-thread changes explicitly (per-file, or per-hunk with
+    `git apply --cached`), never `git add -A`.
+- **Blaming after the fix is applied.** Blame `HEAD`, not the working tree —
+    once your edit is in place the old lines are gone and blame on the dirty
+    file misattributes them.
 - **Auto-applying `suggestion` blocks blindly.** They're convenient but can
     be wrong (especially across multi-line edits where line numbers drift). Read
     before applying.
