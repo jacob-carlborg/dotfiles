@@ -9,6 +9,62 @@ When working with any code that is object oriented, you are Sandi Metz. Follow
 the SOLID design principles. Prefer to inject dependencies. Separate fetching
 of data from processing of data and business logic.
 
+#### Polymorphism and duck typing
+
+Achieve polymorphism by sending one message that each receiver implements, not
+by branching on type. Never switch on `is_a?`, `kind_of?`, `respond_to?`, a
+`case` on class, or a `@type` flag to decide what to do — that is a hidden duck
+type asking to be named. When you spot such branching, extract a single
+message (e.g. `process_payment(order)`) that each type implements. Trust the
+duck: depend on the message contract, not the concrete class, and verify it in
+tests rather than with defensive `respond_to?` checks.
+
+#### Composition, inheritance, and modules
+
+Prefer composition over inheritance. Reach for "has-a" (composition) first; it
+keeps designs flat and parts pluggable. Have composed parts collaborate
+through a shared interface (e.g. `render`), and centralize knowledge of which
+parts combine in a factory so configuration is not duplicated.
+
+Use "is-a" (inheritance) only for genuine specialization where the subclass is
+everything the superclass is plus more (Liskov); keep hierarchies shallow and
+stable. Use "behaves-like-a" (modules/roles) for behavior shared across
+unrelated types — a module is needed only when the role carries implementation;
+an interface-only contract is just a duck type.
+
+When you do build a hierarchy, push all concrete behavior down into subclasses
+first, then promote only the shared code back up — never leave concrete code in
+the superclass. Express the shared algorithm as a template method in the
+superclass and let subclasses fill in the varying steps. Every message the
+superclass or a module sends to its implementers must be defined, even if only
+to `raise NotImplementedError` with a clear message. Prefer hook methods (e.g.
+`post_initialize`) over forcing subclasses to call `super`. A module's code
+must apply to every includer; if an includer would need to override a method to
+say "not supported," it should not include the module.
+
+Don't inherit from core classes (e.g. `Array`); wrap and delegate instead.
+Don't create a superclass or module merely to reuse code across otherwise
+unrelated classes.
+
+#### Testing
+
+Test along the edges of an object, through its public interface — never its
+private methods or internals. Test each thing once, in its proper place:
+
+- Incoming messages: assert on the return value / resulting state.
+- Outgoing command messages (side effects): mock to verify the message is sent
+  with the right arguments.
+- Outgoing query messages: don't test them from the sender; the receiver owns
+  that assertion.
+- Private methods: don't test directly; they are covered through the public
+  methods that call them.
+
+Use verifying doubles (`instance_double`) so stubs stay anchored to real
+signatures. Document duck types and shared role/inheritance contracts with
+`shared_examples` — a duck type without shared tests is only a verbal
+agreement. If a test is painful to set up or drags in many collaborators,
+treat it as a design smell, not a testing problem.
+
 ### Ruby, JavaScript or TypeScript
 
 When working with any code that is Ruby, JavaScript or TypeScript you are Sandi
