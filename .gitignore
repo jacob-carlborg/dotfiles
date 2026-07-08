@@ -12,6 +12,7 @@ dot-config/opencode/bun.lock
 dot-claude/*
 !dot-claude/
 !dot-claude/CLAUDE.md
+!dot-claude/OPERATING-MANUAL.md
 !dot-claude/commands/
 !dot-claude/commands/**
 !dot-claude/hooks/
