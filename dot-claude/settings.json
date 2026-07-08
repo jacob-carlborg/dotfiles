@@ -35,28 +35,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/notify.sh 'Agent is done' \"$(basename \"$CLAUDE_PROJECT_DIR\")\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/notify.sh 'Agent needs input' \"$(basename \"$CLAUDE_PROJECT_DIR\")\"",
-            "timeout": 10
-          }
-        ]
-      }
     ]
   },
   "statusLine": {
@@ -81,6 +59,5 @@
     "autoAllowBashIfSandboxed": true
   },
   "tui": "default",
-  "preferredNotifChannel": "notifications_disabled",
   "skipAutoPermissionPrompt": true
 }
