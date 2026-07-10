@@ -41,11 +41,7 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "enabledPlugins": {
-    "ruby-lsp@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
-  },
+  "enabledPlugins": {},
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
