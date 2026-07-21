@@ -1,6 +1,8 @@
 #!/bin/bash
 input=$(cat)
 MODEL=$(echo "$input" | jq -r '.model.display_name')
+CWD=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
+CWD="${CWD/#$HOME/~}"
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 TOKENS=$(echo "$input" | jq -r '
   [
@@ -26,4 +28,4 @@ else
 fi
 RESET="\033[0m"
 
-echo -e "[$MODEL] ${COLOR}${BAR} ${PCT}% (${TOKENS_FMT} tokens)${RESET}"
+echo -e "[$MODEL] ${COLOR}${BAR} ${PCT}% (${TOKENS_FMT} tokens)${RESET} \033[36m${CWD}\033[0m"
