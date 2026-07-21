@@ -55,5 +55,6 @@
     "autoAllowBashIfSandboxed": true
   },
   "tui": "default",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "agentPushNotifEnabled": true
 }
