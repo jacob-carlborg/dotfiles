@@ -46,7 +46,8 @@ else
   COLOR=$'\033[32m'       # green
 fi
 CYAN=$'\033[36m'
+DIM=$'\033[2m'
 RESET=$'\033[0m'
 
-printf '[%s] %s%s %s%% (%s tokens)%s %s%s%s\n' \
-  "$MODEL" "$COLOR" "$BAR" "$PCT" "$TOKENS_FMT" "$RESET" "$CYAN" "$CWD" "$RESET"
+printf '%s[%s]%s %s%s %s%% (%s tokens)%s %s%s%s\n' \
+  "$DIM" "$MODEL" "$RESET" "$COLOR" "$BAR" "$PCT" "$TOKENS_FMT" "$RESET" "$CYAN" "$CWD" "$RESET"
