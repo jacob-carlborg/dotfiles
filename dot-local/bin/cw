@@ -1,0 +1,11 @@
+#!/usr/bin/env fish
+
+if test (count $argv) -lt 1
+    echo "usage: cw <name> [claude args...]" >&2
+    exit 1
+end
+
+set -l name $argv[1]
+set -l rest $argv[2..-1]
+
+exec claude --worktree $name --name $name --remote-control (basename (pwd))/$name $rest
