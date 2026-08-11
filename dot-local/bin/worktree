@@ -1,7 +1,7 @@
 #!/usr/bin/env -S fish --no-config
 
-# --no-config: config.fish runs `rvm default`, which costs ~550 ms of bash
-# subshell on every startup. Nothing here needs it — PATH is inherited.
+# --no-config: nothing here needs the interactive config, and skipping it keeps
+# an invocation at ~30 ms. PATH is inherited from the calling shell.
 
 function usage
     echo "usage: worktree <command> [args...]"
@@ -10,8 +10,8 @@ function usage
     echo "  switch [name]            switch to a worktree, picking with fzf when no name is"
     echo "                           given (prints the path; the fish wrapper cds there)"
     echo "  create <name> [args...]  create a worktree and start Claude in it"
-    echo "  done [name]              remove a worktree, its branch and its database, picking"
-    echo "                           with fzf when no name is given"
+    echo "  done [name]              remove a worktree, its branch and its database. With no"
+    echo "                           name, removes the worktree you are in, or picks with fzf"
     echo "  --help, -h               show this message"
 end
 
@@ -95,6 +95,27 @@ function done_lines --description "'<branch>\t<branch>' for every worktree that 
     end
 end
 
+function current_branch --description "the branch of the worktree we are in, unless that is the main checkout"
+    set -l toplevel (git rev-parse --show-toplevel 2>/dev/null)
+    or return 1
+
+    set -l records (worktree_records)
+
+    for record in $records[2..-1]
+        if test (record_path $record) = "$toplevel"
+            set -l branch (record_branch $record)
+
+            test -n "$branch"
+            or return 1
+
+            echo $branch
+            return 0
+        end
+    end
+
+    return 1
+end
+
 function paths_matching -a query --description "paths of the worktrees named by query, exact matches winning"
     set -l exact
     set -l partial
@@ -167,7 +188,8 @@ function cmd_done -a name
     or return 1
 
     if test -z "$name"
-        set name (pick "remove:" (done_lines))
+        set name (current_branch)
+        or set name (pick "remove:" (done_lines))
         or return 1
     end
 
