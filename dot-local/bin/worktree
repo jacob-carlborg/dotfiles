@@ -1,0 +1,195 @@
+#!/usr/bin/env -S fish --no-config
+
+# --no-config: config.fish runs `rvm default`, which costs ~550 ms of bash
+# subshell on every startup. Nothing here needs it — PATH is inherited.
+
+function usage
+    echo "usage: worktree <command> [args...]"
+    echo ""
+    echo "commands:"
+    echo "  switch [name]            switch to a worktree, picking with fzf when no name is"
+    echo "                           given (prints the path; the fish wrapper cds there)"
+    echo "  create <name> [args...]  create a worktree and start Claude in it"
+    echo "  done [name]              remove a worktree, its branch and its database, picking"
+    echo "                           with fzf when no name is given"
+    echo "  --help, -h               show this message"
+end
+
+function require_repo
+    if not git rev-parse --git-dir >/dev/null 2>&1
+        echo "worktree: not a git repository" >&2
+        return 1
+    end
+end
+
+function emit_record -a branch path
+    if test -n "$path"
+        printf '%s\t%s\n' $branch $path
+    end
+end
+
+function worktree_records --description "one '<branch>\t<path>' line per worktree, main checkout first"
+    set -l branch ""
+    set -l path ""
+
+    for line in (git worktree list --porcelain)
+        if string match -qr '^worktree ' -- $line
+            emit_record $branch $path
+            set branch ""
+            set path (string replace -r '^worktree ' '' -- $line)
+        else if string match -qr '^branch ' -- $line
+            set branch (string replace -r '^branch refs/heads/' '' -- $line)
+        end
+    end
+
+    emit_record $branch $path
+end
+
+function record_branch -a record
+    string split -f 1 \t -- $record
+end
+
+function record_path -a record
+    string split -f 2 \t -- $record
+end
+
+function record_label -a record --description "the branch, or the directory name when detached"
+    set -l branch (record_branch $record)
+
+    if test -n "$branch"
+        echo $branch
+    else
+        basename (record_path $record)
+    end
+end
+
+function pick -a prompt --description "choose one '<label>\t<value>' line and print its value"
+    set -l lines $argv[2..-1]
+
+    if test (count $lines) -eq 0
+        echo "worktree: nothing to pick from" >&2
+        return 1
+    end
+
+    set -l choice (string join \n $lines | fzf --delimiter \t --with-nth 1 --height 40% --reverse --prompt "$prompt ")
+    or return 1
+
+    string split -f 2 \t -- $choice
+end
+
+function switch_lines --description "'<label>\t<path>' for every worktree"
+    for record in (worktree_records)
+        printf '%s\t%s\n' (record_label $record) (record_path $record)
+    end
+end
+
+function done_lines --description "'<branch>\t<branch>' for every worktree that can be removed"
+    set -l records (worktree_records)
+
+    for record in $records[2..-1]
+        set -l branch (record_branch $record)
+
+        if test -n "$branch"
+            printf '%s\t%s\n' $branch $branch
+        end
+    end
+end
+
+function paths_matching -a query --description "paths of the worktrees named by query, exact matches winning"
+    set -l exact
+    set -l partial
+
+    for record in (worktree_records)
+        set -l path (record_path $record)
+        set -l names (record_label $record) (basename $path)
+
+        if contains -- $query $names
+            set -a exact $path
+        else if string match -q -- "*$query*" $names
+            set -a partial $path
+        end
+    end
+
+    if test (count $exact) -gt 0
+        string join \n $exact
+    else
+        string join \n $partial
+    end
+end
+
+function cmd_switch -a query
+    if test (count $argv) -gt 1
+        echo "usage: worktree switch [name]" >&2
+        return 1
+    end
+
+    require_repo
+    or return 1
+
+    if test -z "$query"
+        pick "switch to:" (switch_lines)
+        return $status
+    end
+
+    set -l paths (paths_matching $query)
+
+    switch (count $paths)
+        case 0
+            echo "worktree: no worktree matches '$query'" >&2
+            return 1
+        case 1
+            echo $paths[1]
+        case '*'
+            echo "worktree: '$query' matches several worktrees:" >&2
+            printf '  %s\n' $paths >&2
+            return 1
+    end
+end
+
+function cmd_create
+    if test (count $argv) -lt 1
+        echo "usage: worktree create <name> [claude args...]" >&2
+        return 1
+    end
+
+    set -l name $argv[1]
+
+    exec claude --worktree $name --name $name --remote-control (basename (pwd))/$name $argv[2..-1]
+end
+
+function cmd_done -a name
+    if test (count $argv) -gt 1
+        echo "usage: worktree done [name]" >&2
+        return 1
+    end
+
+    require_repo
+    or return 1
+
+    if test -z "$name"
+        set name (pick "remove:" (done_lines))
+        or return 1
+    end
+
+    exec workz done -d --cleanup-db $name
+end
+
+switch "$argv[1]"
+    case switch
+        cmd_switch $argv[2..-1]
+    case create
+        cmd_create $argv[2..-1]
+    case done
+        cmd_done $argv[2..-1]
+    case -h --help
+        usage
+    case ''
+        usage >&2
+        exit 1
+    case '*'
+        echo "worktree: unknown command '$argv[1]'" >&2
+        usage >&2
+        exit 1
+end
+
+exit $status
