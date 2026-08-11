@@ -87,11 +87,13 @@ end
 
 source ~/.iterm2_shell_integration.fish
 source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc"
-rvm default
+__ruby_env_autoswitch # see conf.d/ruby.fish
 # temporarily disable until DVM works again
 # dvm --version > /dev/null
 
-set PATH ~/Downloads/zig-aarch64-macos-0.16.0 ~/Downloads/ldc2-1.42.0-osx-arm64/bin ~/.local/bin /opt/homebrew/bin /usr/local/bin $PATH /sbin /usr/sbin
+# ~/.rvm/bin holds rvm-shell, rvm-exec and friends. `rvm default` used to put it
+# here; nothing does now, and `rvm` itself is the function in functions/rvm.fish.
+set PATH ~/Downloads/zig-aarch64-macos-0.16.0 ~/Downloads/ldc2-1.42.0-osx-arm64/bin ~/.local/bin /opt/homebrew/bin /usr/local/bin $PATH /sbin /usr/sbin ~/.rvm/bin
 
 # Added by OrbStack: command-line tools and integration
 # This won't be added again if you remove it.
