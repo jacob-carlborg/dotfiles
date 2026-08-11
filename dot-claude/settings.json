@@ -35,6 +35,17 @@
           }
         ]
       }
+    ],
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workz claude-hook --isolated",
+            "timeout": 300
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
