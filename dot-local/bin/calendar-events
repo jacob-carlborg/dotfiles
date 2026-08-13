@@ -1,0 +1,248 @@
+#!/usr/bin/env bash
+
+# Search Apple Calendar events by title, straight out of Calendar.sqlitedb.
+#
+# Titles are compared after normalizing case and whitespace.
+
+set -euo pipefail
+
+DEFAULT_DB="$HOME/Library/Group Containers/group.com.apple.calendar/Calendar.sqlitedb"
+
+# Calendar stores dates as seconds since the Apple epoch, 2001-01-01 UTC.
+APPLE_EPOCH_OFFSET=978307200
+
+usage() {
+  cat <<'EOF'
+usage: calendar-events [options] <title>
+
+Lists events whose title matches <title>, ignoring case, leading and trailing
+whitespace, and the number of spaces between words. An event is in range when
+any part of it falls in range, so a multi-day event counts on every day it
+covers.
+
+options:
+  -f, --from DATE      only events reaching DATE or later (YYYY-MM-DD)
+  -t, --to DATE        only events starting on DATE or earlier (YYYY-MM-DD)
+  -c, --calendar NAME  only events in this calendar (matched like the title)
+  -s, --substring      match titles containing <title> rather than equalling it
+      --json           print JSON instead of a table
+      --tsv            print tab-separated fields, no header
+      --db PATH        read this database instead of the default
+  -h, --help           show this message
+
+output columns:
+  start, end     local wall-clock time, as Calendar.app shows it. For an
+                 all-day event, the first and last day it covers
+  span           empty for an event inside a single day, otherwise how far it
+                 stretches: "overnight", "all-day", "3 days"
+  calendar       the calendar the event lives in
+  title          the title as stored, whitespace and all
+
+examples:
+  calendar-events --from 2026-08-01 --to 2026-12-31 'Tandläkare'
+  calendar-events --substring --calendar Familj 'Tandläkare'
+  calendar-events --json 'Tandläkare' | jq -r '.[].start'
+EOF
+}
+
+die() {
+  echo "calendar-events: $1" >&2
+  exit 1
+}
+
+sql_string() {
+  printf "'%s'" "${1//\'/\'\'}"
+}
+
+# SQL that lowercases the given expression, turns every kind of blank into a
+# space, collapses runs of spaces and trims the ends. Five doublings cover runs
+# of up to 32 spaces, more than any title holds.
+normalized() {
+  local expression="lower($1)"
+  local blank
+
+  for blank in 'char(9)' 'char(10)' 'char(13)' 'char(160)'; do
+    expression="replace($expression, $blank, ' ')"
+  done
+
+  for _ in 1 2 3 4 5; do
+    expression="replace($expression, '  ', ' ')"
+  done
+
+  printf 'trim(%s)' "$expression"
+}
+
+check_date() {
+  [[ $2 =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || die "$1 expects a YYYY-MM-DD date, got '$2'"
+}
+
+db="${CALENDAR_DB:-$DEFAULT_DB}"
+from=""
+to=""
+calendar=""
+match="exact"
+format="table"
+titles=()
+
+while (($#)); do
+  case $1 in
+    -f | --from)
+      [[ $# -ge 2 ]] || die "$1 needs a date"
+      check_date "$1" "$2"
+      from=$2
+      shift 2
+      ;;
+    -t | --to)
+      [[ $# -ge 2 ]] || die "$1 needs a date"
+      check_date "$1" "$2"
+      to=$2
+      shift 2
+      ;;
+    -c | --calendar)
+      [[ $# -ge 2 ]] || die "$1 needs a calendar name"
+      calendar=$2
+      shift 2
+      ;;
+    --db)
+      [[ $# -ge 2 ]] || die "$1 needs a path"
+      db=$2
+      shift 2
+      ;;
+    -s | --substring)
+      match="substring"
+      shift
+      ;;
+    --json)
+      format="json"
+      shift
+      ;;
+    --tsv)
+      format="tsv"
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      titles+=("$@")
+      break
+      ;;
+    -*)
+      die "unknown option '$1'"
+      ;;
+    *)
+      titles+=("$1")
+      shift
+      ;;
+  esac
+done
+
+if [[ ${#titles[@]} -eq 0 ]]; then
+  usage >&2
+  exit 1
+fi
+
+[[ ${#titles[@]} -eq 1 ]] || die "expected one title, got ${#titles[@]}"
+title=${titles[0]}
+[[ -f $db ]] || die "no calendar database at $db"
+
+# Calendar keeps its most recent changes in the write-ahead log, and querying
+# the live database would fight Calendar.app over locks, so work from a copy of
+# the whole set.
+workdir=$(mktemp -d)
+trap 'rm -rf "$workdir"' EXIT
+copy="$workdir/calendar.sqlitedb"
+cp "$db" "$copy"
+for suffix in -wal -shm; do
+  if [[ -f "$db$suffix" ]]; then
+    cp "$db$suffix" "$copy$suffix"
+  fi
+done
+
+# The values go into the query as SQL literals rather than as bound parameters,
+# because the sqlite shell evaluates ".param set" values as expressions and
+# would read a date as a subtraction. sql_string escapes them.
+wanted_title=$(normalized "$(sql_string "$title")")
+wanted_calendar=$(normalized "$(sql_string "$calendar")")
+from_date=$(sql_string "$from")
+to_date=$(sql_string "$to")
+
+case $match in
+  exact) title_test="title = $wanted_title" ;;
+  substring) title_test="instr(title, $wanted_title) > 0" ;;
+esac
+
+case $format in
+  json) mode=".mode json" ;;
+  tsv) mode=$'.mode list\n.headers off\n.separator "\t"' ;;
+  table) mode=$'.mode column\n.headers on' ;;
+esac
+
+result=$(
+  sqlite3 "$copy" <<SQL
+$mode
+
+with event as (
+  select
+    item.summary as raw_title,
+    item.all_day as all_day,
+    $(normalized 'item.summary') as title,
+    $(normalized 'calendar.title') as calendar,
+    calendar.title as raw_calendar,
+    -- An all-day event carries wall-clock dates with no zone of their own, so
+    -- it is read as-is; a timed one is an instant, shown in the local zone.
+    case when item.all_day = 1
+      then datetime(item.start_date + $APPLE_EPOCH_OFFSET, 'unixepoch')
+      else datetime(item.start_date + $APPLE_EPOCH_OFFSET, 'unixepoch', 'localtime')
+    end as starts,
+    case when item.all_day = 1
+      then datetime(item.end_date + $APPLE_EPOCH_OFFSET, 'unixepoch')
+      else datetime(item.end_date + $APPLE_EPOCH_OFFSET, 'unixepoch', 'localtime')
+    end as ends
+  from CalendarItem item
+  join Calendar calendar on calendar.ROWID = item.calendar_id
+  where item.hidden = 0
+),
+dated as (
+  select
+    *,
+    -- An event ending at midnight belongs to the day before, so measure its
+    -- reach from the last moment it occupies rather than from its end.
+    max(date(starts), date(ends, case when all_day = 1 then '0 seconds' else '-1 second' end)) as last_day
+  from event
+),
+spanned as (
+  select
+    *,
+    cast(julianday(last_day) - julianday(date(starts)) as integer) + 1 as days
+  from dated
+)
+select
+  case when all_day = 1 then date(starts) else substr(starts, 1, 16) end as start,
+  case when all_day = 1 then last_day else substr(ends, 1, 16) end as end,
+  case
+    when all_day = 1 and days = 1 then 'all-day'
+    when all_day = 1 then format('all-day, %d days', days)
+    when days = 1 then ''
+    when days = 2 then 'overnight'
+    else format('%d days', days)
+  end as span,
+  raw_calendar as calendar,
+  raw_title as title
+from spanned
+where $title_test
+  and ($wanted_calendar = '' or calendar = $wanted_calendar)
+  and ($from_date = '' or last_day >= $from_date)
+  and ($to_date = '' or date(starts) <= $to_date)
+order by starts, ends, title;
+SQL
+)
+
+if [[ -z $result ]]; then
+  [[ $format == "json" ]] && echo "[]"
+  exit 0
+fi
+
+printf '%s\n' "$result"
