@@ -68,5 +68,8 @@
   "tui": "default",
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
-  "inputNeededNotifEnabled": true
+  "inputNeededNotifEnabled": true,
+  "spellcheck": {
+    "enabled": true
+  }
 }
