@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+GITHUB_PACKAGES_SERVICE="yarn-npm-pkg-github"
+
+read_keychain() {
+  local service="$1"
+  if ! security find-generic-password -s "$service" -w 2>/dev/null; then
+    echo "error: no keychain entry for service '$service'" >&2
+    echo "       add with: security add-generic-password -s '$service' -a \"\$USER\" -w '<token>'" >&2
+    exit 1
+  fi
+}
+
+# Assign before exporting, so a failing lookup aborts the script instead of
+# being masked by export's own exit status.
+NPM_TOKEN_PKG_GITHUB="$(read_keychain "$GITHUB_PACKAGES_SERVICE")"
+export NPM_TOKEN_PKG_GITHUB
+
+npmrc="$(mktemp)"
+trap 'rm -f "$npmrc"' EXIT
+
+# Yarn substitutes ${VAR} in .npmrc values, so the token stays in the
+# environment and never touches the disk.
+{
+  if [[ -f "$HOME/.npmrc" ]]; then
+    cat "$HOME/.npmrc"
+  fi
+  echo '//npm.pkg.github.com/:_authToken=${NPM_TOKEN_PKG_GITHUB}'
+} > "$npmrc"
+
+export NPM_CONFIG_USERCONFIG="$npmrc"
+
+yarn install "$@"
