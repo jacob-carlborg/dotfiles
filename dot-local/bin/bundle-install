@@ -17,7 +17,10 @@ read_keychain() {
   fi
 }
 
-export BUNDLE_ENTERPRISE__CONTRIBSYS__COM="$(read_keychain "$CONTRIBSYS_SERVICE")"
-export BUNDLE_RUBYGEMS__PKG__GITHUB__COM="$(read_keychain "$GITHUB_PACKAGES_SERVICE")"
+# Assign before exporting, so a failing lookup aborts the script instead of
+# being masked by export's own exit status.
+BUNDLE_ENTERPRISE__CONTRIBSYS__COM="$(read_keychain "$CONTRIBSYS_SERVICE")"
+BUNDLE_RUBYGEMS__PKG__GITHUB__COM="$(read_keychain "$GITHUB_PACKAGES_SERVICE")"
+export BUNDLE_ENTERPRISE__CONTRIBSYS__COM BUNDLE_RUBYGEMS__PKG__GITHUB__COM
 
 exec bundle install "$@"
