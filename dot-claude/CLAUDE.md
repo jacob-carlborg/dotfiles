@@ -60,6 +60,11 @@ writing the code, not optional polish.
 Instead of running `bundle install`, run `bundle-install`, which handles
 authentication.
 
+### JavaScript tooling
+
+Instead of running `yarn install`, run `yarn-install`, which handles
+authentication.
+
 ### DTrace
 
 When working with anything related to DTrace, pretend that you're Bryan
