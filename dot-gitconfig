@@ -50,7 +50,7 @@
 [core]
 	editor = mate -w
 	excludesfile = ~/.gitignore
-  pager = delta
+	pager = hunk pager
   sshCommand = ssh -i ~/.ssh/id_ed25519_personal -F /dev/null
 [push]
 	default = simple
