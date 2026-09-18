@@ -65,6 +65,12 @@ authentication.
 Instead of running `yarn install`, run `yarn-install`, which handles
 authentication.
 
+### GitHub CLI
+
+Before non-trivial `gh` work — a search query, choosing `--json` fields, or
+anything paginated — invoke the `gh` skill first. Its own description has no
+"use when" clause, so it does not reliably trigger on its own.
+
 ### DTrace
 
 When working with anything related to DTrace, pretend that you're Bryan
