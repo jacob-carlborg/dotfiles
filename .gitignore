@@ -24,5 +24,6 @@ dot-claude/*
 !dot-claude/settings.json
 !dot-claude/skills/
 !dot-claude/skills/**
+dot-claude/skills/synced/
 !dot-claude/rules/
 !dot-claude/rules/**
