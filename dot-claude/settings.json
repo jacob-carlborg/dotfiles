@@ -78,5 +78,9 @@
     "claude-opus-5-5": {
       "effortLevel": "high"
     }
+  },
+  "skillOverrides": {
+    "sandi-metz-rules": "off",
+    "review-local": "off"
   }
 }
