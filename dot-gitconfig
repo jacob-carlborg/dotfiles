@@ -51,7 +51,7 @@
 	editor = mate -w
 	excludesfile = ~/.gitignore
 	pager = hunk pager
-  sshCommand = ssh -i ~/.ssh/id_ed25519_personal -F /dev/null
+  sshCommand = ssh -i ~/.ssh/id_ed25519_personal -F /dev/null -o IdentitiesOnly=yes
 [push]
 	default = simple
 [rebase]
