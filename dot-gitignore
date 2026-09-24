@@ -3,3 +3,5 @@
 .nova
 DerivedData
 .codeedit
+
+**/.claude/settings.local.json
