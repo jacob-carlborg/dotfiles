@@ -18,6 +18,8 @@ dot-claude/*
 !dot-claude/commands/**
 !dot-claude/hooks/
 !dot-claude/hooks/**
+!dot-claude/local-marketplace/
+!dot-claude/local-marketplace/**
 !dot-claude/plugins/blocklist.json
 !dot-claude/plugins/known_marketplaces.json
 !dot-claude/plugins/marketplaces/claude-plugins-official

@@ -53,13 +53,20 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "datadog@claude-plugins-official": true
+    "datadog@claude-plugins-official": true,
+    "mattpocock@dotfiles": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
         "source": "git",
         "url": "https://github.com/anthropics/claude-plugins-official.git"
+      }
+    },
+    "dotfiles": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/jacobcarlborg/.claude/local-marketplace"
       }
     }
   },

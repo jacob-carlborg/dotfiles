@@ -1,0 +1,14 @@
+{
+  "name": "dotfiles",
+  "description": "Personal plugins managed in the dotfiles repo",
+  "owner": {
+    "name": "Jacob Carlborg"
+  },
+  "plugins": [
+    {
+      "name": "mattpocock",
+      "source": "./plugins/mattpocock",
+      "description": "Matt Pocock's engineering skills"
+    }
+  ]
+}
