@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# List the open child tickets of a GitHub Wayfinder map, one per line:
+#
+#   <number> TAB <status> TAB <url> TAB <title>
+#
+# <status> is `frontier` (open, unblocked, unclaimed), `blocked:<n>,<n>` (the
+# open tickets blocking it) or `claimed:<login>,<login>` (its assignees).
+#
+# Usage: frontier <map-url | owner/repo#number>
+
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "usage: frontier <map-url | owner/repo#number>" >&2
+  exit 2
+fi
+
+if [[ $1 =~ ^https://github\.com/([^/]+)/([^/]+)/issues/([0-9]+) ]] ||
+   [[ $1 =~ ^([^/#]+)/([^/#]+)#([0-9]+)$ ]]; then
+  owner=${BASH_REMATCH[1]}
+  repo=${BASH_REMATCH[2]}
+  number=${BASH_REMATCH[3]}
+else
+  echo "frontier: not a GitHub issue URL or owner/repo#number: $1" >&2
+  exit 2
+fi
+
+query='
+query($owner: String!, $repo: String!, $number: Int!) {
+  repository(owner: $owner, name: $repo) {
+    issue(number: $number) {
+      labels(first: 20) { nodes { name } }
+      subIssues(first: 100) {
+        totalCount
+        nodes {
+          number title url state
+          assignees(first: 10) { nodes { login } }
+          blockedBy(first: 50) { nodes { number state } }
+        }
+      }
+    }
+  }
+}'
+
+map=$(gh api graphql -F owner="$owner" -F repo="$repo" -F number="$number" \
+  -f query="$query" --jq '.data.repository.issue')
+
+if ! jq -e '[.labels.nodes[].name] | index("wayfinder:map")' <<<"$map" >/dev/null; then
+  echo "frontier: $owner/$repo#$number is not labelled wayfinder:map" >&2
+  exit 1
+fi
+
+if jq -e '.subIssues.totalCount > (.subIssues.nodes | length)' <<<"$map" >/dev/null; then
+  echo "frontier: map has more than 100 child tickets; only the first 100 are listed" >&2
+fi
+
+jq -r '
+  .subIssues.nodes[]
+  | select(.state == "OPEN")
+  | ([.blockedBy.nodes[] | select(.state == "OPEN") | .number | tostring]) as $blockers
+  | ([.assignees.nodes[].login]) as $assignees
+  | (if ($assignees | length) > 0 then "claimed:" + ($assignees | join(","))
+     elif ($blockers | length) > 0 then "blocked:" + ($blockers | join(","))
+     else "frontier" end) as $status
+  | [.number, $status, .url, .title]
+  | @tsv
+' <<<"$map"
