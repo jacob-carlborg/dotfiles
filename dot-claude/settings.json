@@ -23,6 +23,7 @@
     ],
     "defaultMode": "auto"
   },
+  "model": "opus",
   "skillOverrides": {
     "sandi-metz-rules": "off",
     "review-local": "off"
@@ -90,5 +91,5 @@
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
-  "model": "opus"
+  "remoteControlAtStartup": true
 }
