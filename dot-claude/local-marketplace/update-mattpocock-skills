@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#
+# Diffs the vendored Matt Pocock skills against the upstream commit that
+# Anthropic's official marketplace pins: the latest commit that passed
+# Anthropic's policy scan. With --apply, syncs the vendored skills to it.
+#
+# To add a skill, create its empty directory under plugins/mattpocock/skills/
+# and run this: the whole skill then shows up in the diff.
+
+set -euo pipefail
+
+MARKETPLACE_URL="https://raw.githubusercontent.com/anthropics/claude-plugins-official/main/.claude-plugin/marketplace.json"
+SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/plugins/mattpocock/skills"
+
+usage() {
+  echo "usage: update-mattpocock-skills [--apply]"
+  echo ""
+  echo "  (no option)  show the diff from the vendored skills to the pinned commit"
+  echo "  --apply      sync the vendored skills to the pinned commit"
+}
+
+pinned_sha() {
+  curl -fsSL "$MARKETPLACE_URL" |
+    jq -er '.plugins[] | select(.name == "mattpocock-skills") | .source.sha'
+}
+
+download() {
+  local sha="$1" dest="$2"
+  mkdir -p "$dest"
+  curl -fsSL "https://codeload.github.com/mattpocock/skills/tar.gz/$sha" |
+    tar -xz -C "$dest" --strip-components=1
+}
+
+upstream_path() {
+  local upstream="$1" name="$2"
+  jq -er --arg name "$name" '.skills[] | select(split("/") | last == $name)' \
+    "$upstream/.claude-plugin/plugin.json"
+}
+
+# Copies each vendored skill to $work/vendored and its pinned upstream version
+# to $work/pinned, so a single diff covers every skill.
+stage() {
+  local work="$1" name path
+  mkdir -p "$work/vendored" "$work/pinned"
+  for dir in "$SKILLS_DIR"/*/; do
+    name="$(basename "$dir")"
+    if ! path="$(upstream_path "$work/upstream" "$name")"; then
+      echo "warning: $name is not in the upstream plugin, skipping" >&2
+      continue
+    fi
+    cp -R "$dir" "$work/vendored/$name"
+    cp -R "$work/upstream/$path" "$work/pinned/$name"
+  done
+}
+
+apply() {
+  local work="$1"
+  for dir in "$work/pinned"/*/; do
+    rsync -a --delete "$dir" "$SKILLS_DIR/$(basename "$dir")/"
+  done
+}
+
+main() {
+  local mode="diff"
+  case "${1:-}" in
+    "") ;;
+    --apply) mode="apply" ;;
+    -h|--help) usage; exit 0 ;;
+    *) usage >&2; exit 1 ;;
+  esac
+
+  local sha work
+  sha="$(pinned_sha)"
+  work="$(mktemp -d)"
+  # Expanded now: $work is local, so it's gone by the time the trap runs.
+  # shellcheck disable=SC2064
+  trap "rm -rf -- '$work'" EXIT
+
+  echo "Pinned by claude-plugins-official: $sha"
+  download "$sha" "$work/upstream"
+  stage "$work"
+
+  if (cd "$work" && git diff --no-index --quiet vendored pinned); then
+    echo "Vendored skills are up to date."
+  elif [[ "$mode" == "apply" ]]; then
+    apply "$work"
+    echo "Synced to $sha. Then run: claude plugin update mattpocock@dotfiles"
+  else
+    (cd "$work" && git diff --no-index vendored pinned) || true
+  fi
+}
+
+main "$@"
