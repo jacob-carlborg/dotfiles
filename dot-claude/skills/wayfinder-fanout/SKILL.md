@@ -6,7 +6,8 @@ description: Fan a Wayfinder map out into parallel Claude Code sessions — one 
 # Fan a Wayfinder map out into sessions
 
 Take a Wayfinder map issue, find its frontier tickets, and open one cmux
-workspace per ticket. Each workspace runs `claude-swap run`, which starts a
+workspace per ticket, split with a terminal on the left and the ticket in a
+browser on the right. The terminal runs `claude-swap run`, which starts a
 Claude Code session in its own git worktree with `/mattpocock:wayfinder` on that
 ticket as the initial prompt. The workspaces go in one new workspace group. The
 user then drives every session from its own workspace.
@@ -83,7 +84,15 @@ For each frontier ticket, in the order `frontier` printed them:
 CMUX_QUIET=1 cmux new-workspace --name '<workspace-title>' --cwd <repo-root> --focus false --group workspace_group:<g> --group-placement end
 ```
 
-Prints `OK workspace:<n>`. Keep that ref. Then start the session:
+Prints `OK workspace:<n>`. Keep that ref. Then open the ticket in a browser
+pane to the right of the workspace's terminal:
+
+```bash
+CMUX_QUIET=1 cmux new-pane --type browser --direction right --workspace workspace:<n> --url <ticket-url>
+```
+
+The new pane is not focused, so the terminal on the left keeps focus and the
+`cmux send` below still types into it. Then start the session:
 
 ```bash
 CMUX_QUIET=1 cmux send --workspace workspace:<n> "claude-swap run -- --worktree <session-name> --name <session-name> '/mattpocock:wayfinder Work ticket <ticket-url> on map <map-url>'"
@@ -112,11 +121,12 @@ as a typed slash command, as it is here.
 CMUX_QUIET=1 cmux read-screen --workspace workspace:<n> --lines 30
 ```
 
-For each workspace, look for the Claude banner, the worktree path, and
-`/mattpocock:wayfinder` starting on the ticket. If a screen still shows the
-shell, read it again rather than re-sending the command. Do not use foreground
-`sleep`; use a backgrounded `until` loop or just re-read. If a session failed
-to start, say which one and why, and don't retry it on a guess.
+This reads the terminal, since it has focus. For each workspace, look for the
+Claude banner, the worktree path, and `/mattpocock:wayfinder` starting on the
+ticket. If a screen still shows the shell, read it again rather than
+re-sending the command. Do not use foreground `sleep`; use a backgrounded
+`until` loop or just re-read. If a session failed to start, say which one and
+why, and don't retry it on a guess.
 
 These screen reads are the last contact with the launched sessions.
 
