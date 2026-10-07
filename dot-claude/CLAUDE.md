@@ -67,9 +67,14 @@ authentication.
 
 ### GitHub CLI
 
-Before non-trivial `gh` work — a search query, choosing `--json` fields, or
-anything paginated — invoke the `gh` skill first. Its own description has no
-"use when" clause, so it does not reliably trigger on its own.
+Invoke the `gh` skill before any GitHub task: reading or changing issues,
+PRs, discussions, comments, or repo files, uploading images or videos, or
+searching. Do this even when you believe `gh` can't do it, because the skill
+documents features newer than your training data (e.g. `--attach` uploads
+images and videos to PR and issue bodies and comments). Don't fall back to a
+browser for a GitHub task until you've checked the skill. The skill's own
+description has no "use when" clause, so it does not reliably trigger on its
+own.
 
 ### DTrace
 
