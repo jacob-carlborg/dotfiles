@@ -6,7 +6,9 @@ description: Hand a piece of work to a fresh Claude Code session running in its 
 # Delegate to a worktree session
 
 Open a new cmux workspace, start a Claude Code session in a fresh git worktree
-inside it, and brief that session on the work. The current session stays free —
+inside it, and brief that session on the work. When the work has a GitHub
+issue, the workspace is split with the terminal on the left and the issue in a
+browser on the right. The current session stays free —
 it hands off and reports the address, it does not implement the work itself.
 
 The two sessions are **fully disconnected** after the handoff. The brief goes
@@ -72,6 +74,17 @@ it if they asked to be taken to the new session.
 
 `CMUX_QUIET=1` suppresses the legacy-alias notices some `cmux` subcommands
 print.
+
+If the work has a related GitHub issue, open it in a browser pane to the
+right of the workspace's terminal:
+
+```bash
+CMUX_QUIET=1 cmux new-pane --type browser --direction right --workspace workspace:<n> --url <issue-url>
+```
+
+The new pane is not focused, so the terminal on the left keeps focus and the
+`cmux send` and `cmux read-screen` calls below still target it. Skip this when
+there is no issue; don't open a PR or anything else in its place.
 
 ### 4. Start the worktree session with the brief
 
