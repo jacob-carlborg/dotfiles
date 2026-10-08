@@ -167,6 +167,14 @@ function cmd_switch -a query
     end
 end
 
+function name_cmux_workspace -a name --description "rename the cmux workspace we are in, unless it was given a name explicitly"
+    set -q CMUX_WORKSPACE_ID
+    or return 0
+
+    cmux --json current-workspace 2>/dev/null | jq -e '.workspace.has_custom_title | not' >/dev/null
+    and cmux rename-workspace --workspace $CMUX_WORKSPACE_ID $name >/dev/null
+end
+
 function cmd_create
     if test (count $argv) -lt 1
         echo "usage: worktree create <name> [claude args...]" >&2
@@ -174,6 +182,8 @@ function cmd_create
     end
 
     set -l name $argv[1]
+
+    name_cmux_workspace $name
 
     exec claude --worktree $name --name $name --remote-control (basename (pwd))/$name $argv[2..-1]
 end
