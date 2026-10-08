@@ -1,4 +1,5 @@
 dot-config/fish/extra.fish
+dot-config/fish/conf.d/rustup.fish
 
 dot-config/zed/.tmp*
 dot-config/zed/conversations
