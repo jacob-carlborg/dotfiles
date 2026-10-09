@@ -6,8 +6,9 @@ description: Fan a Wayfinder map out into parallel Claude Code sessions — one 
 # Fan a Wayfinder map out into sessions
 
 Take a Wayfinder map issue, find its frontier tickets, and open one cmux
-workspace per ticket, split with a terminal on the left and the ticket in a
-browser on the right. The terminal runs `claude-swap run`, which starts a
+workspace per ticket, split with a terminal on the left and, on the right, the
+ticket in a browser tab next to a second terminal tab in the session's
+worktree. The left terminal runs `claude-swap run`, which starts a
 Claude Code session in its own git worktree with `/mattpocock:wayfinder` on that
 ticket as the initial prompt. The workspaces go in one new workspace group. The
 user then drives every session from its own workspace.
@@ -84,15 +85,7 @@ For each frontier ticket, in the order `frontier` printed them:
 CMUX_QUIET=1 cmux new-workspace --name '<workspace-title>' --cwd <repo-root> --focus false --group workspace_group:<g> --group-placement end
 ```
 
-Prints `OK workspace:<n>`. Keep that ref. Then open the ticket in a browser
-pane to the right of the workspace's terminal:
-
-```bash
-CMUX_QUIET=1 cmux new-pane --type browser --direction right --workspace workspace:<n> --url <ticket-url>
-```
-
-The new pane is not focused, so the terminal on the left keeps focus and the
-`cmux send` below still types into it. Then start the session:
+Prints `OK workspace:<n>`. Keep that ref. Then start the session:
 
 ```bash
 CMUX_QUIET=1 cmux send --workspace workspace:<n> "claude-swap run -- --worktree <session-name> --name <session-name> '/mattpocock:wayfinder Work ticket <ticket-url> on map <map-url>'"
@@ -130,7 +123,29 @@ why, and don't retry it on a guess.
 
 These screen reads are the last contact with the launched sessions.
 
-### 7. Report back
+### 7. Open the ticket and a second terminal
+
+For each session that booted, its worktree now exists. Open a pane to the right
+of the session's terminal, with a terminal tab in the worktree and the ticket
+in a browser tab:
+
+```bash
+CMUX_QUIET=1 cmux new-pane --type terminal --direction right --workspace workspace:<n> --command 'cd <repo-root>/.claude/worktrees/<session-name> && clear'
+CMUX_QUIET=1 cmux new-surface --type browser --pane pane:<p> --workspace workspace:<n> --url <ticket-url>
+```
+
+`new-pane` prints `OK surface:<s> pane:<p> workspace:<n>`; the browser tab goes
+into that `pane:<p>`. `new-pane` has no working-directory flag, and its
+terminal starts in the workspace's directory, the main checkout, so
+`--command` types the `cd` into the new shell. The browser tab is added last
+because the last tab added to a pane is the one shown, which keeps the ticket
+visible. Neither call takes focus, so the session's terminal on the left keeps
+it.
+
+For a session that failed to start, skip this and leave its workspace as it
+is.
+
+### 8. Report back
 
 Give the user the group ref and name, then a table with one row per launched
 session: ticket (its name linked to its URL), workspace ref, and session name. Then

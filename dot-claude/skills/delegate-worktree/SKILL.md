@@ -6,9 +6,10 @@ description: Hand a piece of work to a fresh Claude Code session running in its 
 # Delegate to a worktree session
 
 Open a new cmux workspace, start a Claude Code session in a fresh git worktree
-inside it, and brief that session on the work. When the work has a GitHub
-issue, the workspace is split with the terminal on the left and the issue in a
-browser on the right. The current session stays free —
+inside it, and brief that session on the work. The workspace is split with the
+session's terminal on the left and a second terminal in the worktree on the
+right. When the work has a GitHub issue, the issue goes in a browser tab next
+to that second terminal. The current session stays free —
 it hands off and reports the address, it does not implement the work itself.
 
 The two sessions are **fully disconnected** after the handoff. The brief goes
@@ -75,17 +76,6 @@ it if they asked to be taken to the new session.
 `CMUX_QUIET=1` suppresses the legacy-alias notices some `cmux` subcommands
 print.
 
-If the work has a related GitHub issue, open it in a browser pane to the
-right of the workspace's terminal:
-
-```bash
-CMUX_QUIET=1 cmux new-pane --type browser --direction right --workspace workspace:<n> --url <issue-url>
-```
-
-The new pane is not focused, so the terminal on the left keeps focus and the
-`cmux send` and `cmux read-screen` calls below still target it. Skip this when
-there is no issue; don't open a PR or anything else in its place.
-
 ### 4. Start the worktree session with the brief
 
 ```bash
@@ -121,7 +111,33 @@ use foreground `sleep`; use a backgrounded `until` loop or just re-read.
 
 This screen read is the last contact with the delegated session.
 
-### 5. Report back
+### 5. Open a second terminal and the issue
+
+Once the session has booted, the worktree exists. Open a pane to the right of
+the session's terminal, with a terminal in the worktree:
+
+```bash
+CMUX_QUIET=1 cmux new-pane --type terminal --direction right --workspace workspace:<n> --command 'cd <repo-root>/.claude/worktrees/<name> && clear'
+```
+
+It prints `OK surface:<s> pane:<p> workspace:<n>`. `new-pane` has no
+working-directory flag, and its terminal starts in the workspace's directory,
+the main checkout, so `--command` types the `cd` into the new shell.
+
+If the work has a related GitHub issue, open it in a browser tab in that same
+pane:
+
+```bash
+CMUX_QUIET=1 cmux new-surface --type browser --pane pane:<p> --workspace workspace:<n> --url <issue-url>
+```
+
+The browser tab is added last because the last tab added to a pane is the one
+shown, which keeps the issue visible. Skip it when there is no issue; don't
+open a PR or anything else in its place.
+
+Neither call takes focus, so the session's terminal on the left keeps it.
+
+### 6. Report back
 
 Tell the user the workspace ref, the session name, the worktree path, and one
 line on what the session was asked to do. Then stop — do
