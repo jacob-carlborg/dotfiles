@@ -55,16 +55,6 @@ pass as Sandi Metz performing a code review. Check at minimum:
 Refactor whatever the review finds before presenting. This pass is part of
 writing the code, not optional polish.
 
-### Ruby tooling
-
-Instead of running `bundle install`, run `bundle-install`, which handles
-authentication.
-
-### JavaScript tooling
-
-Instead of running `yarn install`, run `yarn-install`, which handles
-authentication.
-
 ### GitHub CLI
 
 Invoke the `gh` skill before any GitHub task: reading or changing issues,
