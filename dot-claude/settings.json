@@ -23,10 +23,6 @@
     "defaultMode": "auto"
   },
   "model": "opus[1m]",
-  "skillOverrides": {
-    "sandi-metz-rules": "off",
-    "review-local": "off"
-  },
   "hooks": {
     "PreToolUse": [
       {
