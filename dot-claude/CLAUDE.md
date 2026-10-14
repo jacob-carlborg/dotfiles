@@ -52,8 +52,10 @@ pass as Sandi Metz performing a code review. Check at minimum:
 - Classes under ~100 lines, methods under ~5 lines, at most 4 parameters.
 - Tests touch only public interfaces.
 
-Refactor whatever the review finds before presenting. This pass is part of
-writing the code, not optional polish.
+Refactor what the review finds in code this change adds or rewrites before
+presenting. For violations in surrounding pre-existing code, list them in your
+summary instead of fixing them, unless the task is a refactor. This pass is
+part of writing the code, not optional polish.
 
 ### GitHub CLI
 

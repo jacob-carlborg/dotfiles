@@ -52,7 +52,7 @@ fi
 
 if [ $result -eq 2 ]; then
   {
-    echo "Lint offenses in $file — fix them before finishing:"
+    echo "Lint offenses in $file — fix those on lines you changed; list the rest in your summary:"
     printf '%s\n' "$output"
   } >&2
   exit 2
