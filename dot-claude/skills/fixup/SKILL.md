@@ -129,7 +129,7 @@ sensible commit history):
 3. Create the fixup commit:
 
     ```sh
-    git commit --fixup=<target_sha> --no-verify=false
+    git commit --fixup=<target_sha>
     ```
 
     (Don't pass `--no-verify` — let pre-commit hooks run. If a hook fails,
