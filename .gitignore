@@ -26,5 +26,6 @@ dot-claude/*
 !dot-claude/skills/
 !dot-claude/skills/**
 dot-claude/skills/synced/
+dot-claude/skills/.trash/
 !dot-claude/rules/
 !dot-claude/rules/**
