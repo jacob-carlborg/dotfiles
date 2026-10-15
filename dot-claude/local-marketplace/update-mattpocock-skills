@@ -8,11 +8,16 @@
 #
 # To add a skill, create its empty directory under plugins/mattpocock/skills/
 # and run this: the whole skill then shows up in the diff.
+#
+# To add to a skill, write the text to additions/<skill>.md: it's appended
+# to the upstream SKILL.md, so the diff shows only upstream changes.
 
 set -euo pipefail
 
 MARKETPLACE_URL="https://raw.githubusercontent.com/anthropics/claude-plugins-official/main/.claude-plugin/marketplace.json"
-SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/plugins/mattpocock/skills"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILLS_DIR="$ROOT/plugins/mattpocock/skills"
+ADDITIONS_DIR="$ROOT/additions"
 
 usage() {
   echo "usage: update-mattpocock-skills [--apply] [--ref <ref>]"
@@ -50,8 +55,15 @@ upstream_path() {
     "$source/.claude-plugin/plugin.json"
 }
 
-# Copies each vendored skill to $work/vendored and its upstream version to
-# $work/upstream, so a single diff covers every skill.
+append_additions() {
+  local skill_md="$2" additions="$ADDITIONS_DIR/$1.md"
+  [[ -f "$additions" ]] || return 0
+  printf '\n' >>"$skill_md"
+  cat "$additions" >>"$skill_md"
+}
+
+# Copies each vendored skill to $work/vendored and its upstream version, plus
+# its additions, to $work/upstream, so a single diff covers every skill.
 stage() {
   local work="$1" name path
   mkdir -p "$work/vendored" "$work/upstream"
@@ -63,6 +75,7 @@ stage() {
     fi
     cp -R "$dir" "$work/vendored/$name"
     cp -R "$work/source/$path" "$work/upstream/$name"
+    append_additions "$name" "$work/upstream/$name/SKILL.md"
   done
 }
 
