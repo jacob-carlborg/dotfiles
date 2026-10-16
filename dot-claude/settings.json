@@ -95,6 +95,7 @@
     }
   },
   "tui": "fullscreen",
+  "idleCompaction": false,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
