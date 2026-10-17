@@ -32,6 +32,12 @@
             "type": "command",
             "command": "~/.claude/hooks/require-install-wrapper.sh bundle bundle-install yarn yarn-install",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-gh-token.py",
+            "timeout": 10,
+            "onFailure": "block"
           }
         ]
       }
