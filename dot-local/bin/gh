@@ -1,0 +1,68 @@
+#!/bin/sh
+# Wrapper around gh that picks the account from a `.gh-account` file.
+#
+# Walks up from the current directory until a `.gh-account` file is found,
+# stopping after the home directory (or at / when outside of it). The first
+# line of the file is the account name, as listed by `gh auth status`. The
+# token for that account is passed to gh through GH_TOKEN. It's an error if no
+# account file is found; add `~/.gh-account` for a default account.
+#
+# The account file is ignored when GH_TOKEN is already set and for `gh auth`
+# commands, which manage the stored accounts themselves.
+
+set -eu
+
+account_file=.gh-account
+
+real_gh() {
+  self=$(cd "$(dirname "$0")" && pwd -P)/$(basename "$0")
+  IFS=:
+  for dir in $PATH; do
+    candidate=$dir/gh
+    [ -x "$candidate" ] || continue
+    [ "$(cd "$dir" && pwd -P)/gh" = "$self" ] && continue
+    printf '%s\n' "$candidate"
+    return
+  done
+  echo "gh wrapper: the real gh was not found in PATH" >&2
+  exit 1
+}
+
+find_account_file() {
+  dir=$PWD
+  while :; do
+    if [ -f "$dir/$account_file" ]; then
+      printf '%s\n' "$dir/$account_file"
+      return
+    fi
+    if [ "$dir" = "$HOME" ] || [ "$dir" = / ]; then
+      return
+    fi
+    dir=$(dirname "$dir")
+  done
+}
+
+gh=$(real_gh)
+
+if [ -n "${GH_TOKEN:-}" ] || [ "${1:-}" = auth ]; then
+  exec "$gh" "$@"
+fi
+
+file=$(find_account_file)
+if [ -z "$file" ]; then
+  echo "gh wrapper: no $account_file file found in $PWD or its parents" >&2
+  exit 1
+fi
+
+account=$(head -n 1 "$file" | tr -d '[:space:]')
+if [ -z "$account" ]; then
+  echo "gh wrapper: $file is empty" >&2
+  exit 1
+fi
+
+if ! token=$("$gh" auth token --user "$account"); then
+  echo "gh wrapper: no token for account '$account' (from $file)" >&2
+  exit 1
+fi
+
+GH_TOKEN=$token exec "$gh" "$@"
