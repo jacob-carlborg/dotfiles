@@ -42,9 +42,25 @@ find_account_file() {
   done
 }
 
+# Prints the top-level gh command, skipping flags placed before it the way
+# cobra does: a `--flag` or `-f` without `=` takes the next argument as its
+# value, except the root's boolean flags.
+subcommand() {
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --) return ;;
+      --help|--version|--*=*|-?=*) ;;
+      --*|-?) shift ;;
+      -*) ;;
+      *) printf '%s\n' "$1"; return ;;
+    esac
+    [ $# -gt 0 ] && shift
+  done
+}
+
 gh=$(real_gh)
 
-if [ -n "${GH_TOKEN:-}" ] || [ "${1:-}" = auth ]; then
+if [ -n "${GH_TOKEN:-}" ] || [ "$(subcommand "$@")" = auth ]; then
   exec "$gh" "$@"
 fi
 
