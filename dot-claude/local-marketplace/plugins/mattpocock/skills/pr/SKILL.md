@@ -168,3 +168,11 @@ Execution-based evidence is A-tier. Test results, console output. Show the exact
 Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A PR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.
 
 The blast radius is the potential impact or scope of the changes introduced by this PR. Consider all possibilities. Examples are layout shift, breakages for consumers, mobile responsiveness, etc.
+
+## Screenshots
+
+When the diff changes what a browser renders, the Evidence section shows screenshots of the affected page:
+
+1. Load the Safari MCP screenshot tool with `ToolSearch` (`select:mcp__safari-mcp__screenshot`). It saves a PNG and returns its path; pass `savePath` to write it to the scratchpad directory.
+2. Capture **After** on the current branch. Capture **Before** on the base branch, from a `git worktree`, when the app runs there; otherwise show only **After** and state why.
+3. Reference each PNG in the body as `![<alt>](<path>)` and pass the same path to `gh pr create` or `gh pr edit` with `--attach <path>`. `gh` uploads the file and rewrites the reference to its URL.
