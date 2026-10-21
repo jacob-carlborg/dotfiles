@@ -172,7 +172,7 @@ function name_cmux_workspace -a name --description "rename the cmux workspace we
     or return 0
 
     cmux --json current-workspace 2>/dev/null | jq -e '.workspace.has_custom_title | not' >/dev/null
-    and cmux rename-workspace --workspace $CMUX_WORKSPACE_ID $name >/dev/null
+    and cmux workspace rename $CMUX_WORKSPACE_ID --title $name >/dev/null
 end
 
 function cmd_create
