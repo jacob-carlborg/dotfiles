@@ -39,8 +39,9 @@ conversation. Everything it needs goes in the brief. A brief that says
 "implement 1-3" or "fix the thing we discussed" wastes the handoff.
 
 Write it to `<scratchpad>/<name>-brief.md`, in this session's scratchpad
-directory. It is a temporary handoff file: the new session reads it into its
-context as its first action and then deletes it, so nothing lingers.
+directory. The file is only the transport: step 4 expands it into the new
+session's initial prompt, so the brief arrives as its first user message, and
+this session deletes the file once the session has booted.
 
 Include:
 
@@ -96,23 +97,27 @@ print.
 ### 4. Start the worktree session with the brief
 
 ```bash
-CMUX_QUIET=1 cmux send --workspace workspace:<n> "worktree create <name> 'Read the brief at <scratchpad>/<name>-brief.md, delete that file, then carry out the brief.'"
+CMUX_QUIET=1 cmux send --workspace workspace:<n> "worktree create <name> \"\$(cat <scratchpad>/<name>-brief.md)\""
 CMUX_QUIET=1 cmux send-key --workspace workspace:<n> enter
 ```
 
 The new session must start the way it would if the user had typed their
 prompt into it by hand. Any slash command in the user's prompt (e.g.
-`/mattpocock:implement`) therefore goes verbatim at the front of the quoted
-prompt, and stays out of the brief — many workflow skills are user-only, so a
+`/mattpocock:implement`) therefore goes verbatim at the front of the same
+quoted argument, and stays out of the brief. Claude Code runs it as a command
+with the brief as its arguments. Many workflow skills are user-only, so a
 brief telling the session to invoke one leaves it unable to:
 
 ```bash
-CMUX_QUIET=1 cmux send --workspace workspace:<n> "worktree create <name> '/mattpocock:implement Read the brief at <scratchpad>/<name>-brief.md, delete that file, then carry out the brief.'"
+CMUX_QUIET=1 cmux send --workspace workspace:<n> "worktree create <name> \"/mattpocock:implement \$(cat <scratchpad>/<name>-brief.md)\""
 ```
 
 `cmux send` types the text but does not submit it — the separate `send-key
-enter` is required. Keep the quoted prompt to that one line: `cmux send`
-turns `\n` into Enter, so the brief itself must never be typed through it.
+enter` is required. It also turns `\n` into Enter, so the brief itself is
+never typed through it: the escaped `\$(cat …)` reaches the new workspace's
+shell (fish 3.4+ or zsh) unexpanded, and that shell expands it there. Inside
+double quotes the file stays one argument, newlines, quotes, `$` and backticks
+intact.
 
 `worktree create <name> [claude args...]` execs:
 
@@ -120,9 +125,9 @@ turns `\n` into Enter, so the brief itself must never be typed through it.
 claude --worktree <name> --name <name> --remote-control <repo>/<name> [claude args...]
 ```
 
-so the trailing quoted string becomes the new session's initial prompt, and it
-reads the brief file as its first action. Use the same `<name>` as the
-workspace so the sidebar entry and the session name agree.
+so the quoted argument becomes the new session's initial prompt — its first
+user message. Use the same `<name>` as the workspace so the sidebar entry and
+the session name agree.
 
 Confirm it booted:
 
@@ -136,7 +141,16 @@ creation clones the database, so this takes a few seconds — if the screen stil
 shows the shell, wait and read again rather than re-sending the command. Do not
 use foreground `sleep`; use a backgrounded `until` loop or just re-read.
 
-This screen read is the last contact with the delegated session.
+Once it has booted, the shell has expanded the brief, so delete the file:
+
+```bash
+rm <scratchpad>/<name>-brief.md
+```
+
+It can't be chained after `worktree create`, which execs Claude and never
+returns.
+
+The boot-confirming screen read is the last contact with the delegated session.
 
 ### 5. Open a second terminal and the issue
 
