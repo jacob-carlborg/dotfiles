@@ -100,6 +100,16 @@ CMUX_QUIET=1 cmux send --workspace workspace:<n> "worktree create <name> 'Read t
 CMUX_QUIET=1 cmux send-key --workspace workspace:<n> enter
 ```
 
+The new session must start the way it would if the user had typed their
+prompt into it by hand. Any slash command in the user's prompt (e.g.
+`/mattpocock:implement`) therefore goes verbatim at the front of the quoted
+prompt, and stays out of the brief — many workflow skills are user-only, so a
+brief telling the session to invoke one leaves it unable to:
+
+```bash
+CMUX_QUIET=1 cmux send --workspace workspace:<n> "worktree create <name> '/mattpocock:implement Read the brief at <scratchpad>/<name>-brief.md, delete that file, then carry out the brief.'"
+```
+
 `cmux send` types the text but does not submit it — the separate `send-key
 enter` is required. Keep the quoted prompt to that one line: `cmux send`
 turns `\n` into Enter, so the brief itself must never be typed through it.
