@@ -64,6 +64,23 @@ Include:
 
 ### 3. Create the workspace
 
+First find the workspace group this session's workspace belongs to, if any:
+
+```bash
+ws=$(CMUX_QUIET=1 cmux identify | jq -r .caller.workspace_ref)
+CMUX_QUIET=1 cmux workspace-group list --json | jq -r --arg ws "$ws" '.groups[] | select(.member_workspace_refs | index($ws)) | .ref'
+```
+
+It prints `workspace_group:<g>`, or nothing when the workspace is ungrouped.
+If it printed a group, put the new workspace in that same group, unless the
+user asked for a different group or for no group:
+
+```bash
+CMUX_QUIET=1 cmux new-workspace --name <name> --cwd <repo-root> --focus false --group workspace_group:<g> --group-placement end
+```
+
+Otherwise leave out the group flags:
+
 ```bash
 CMUX_QUIET=1 cmux new-workspace --name <name> --cwd <repo-root> --focus false
 ```
@@ -139,7 +156,8 @@ Neither call takes focus, so the session's terminal on the left keeps it.
 
 ### 6. Report back
 
-Tell the user the workspace ref, the session name, the worktree path, and one
+Tell the user the workspace ref, the group it went into (if any), the session
+name, the worktree path, and one
 line on what the session was asked to do. Then stop — do
 not implement the work in this session, do not read its screen again, and do
 not poll it for progress. It reports to the user in its own workspace.
