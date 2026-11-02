@@ -11,7 +11,10 @@ function usage
     echo "                           given (prints the path; the fish wrapper cds there)"
     echo "  create <name> [args...]  create a worktree and start Claude in it"
     echo "  done [name]              remove a worktree, its branch and its database. With no"
-    echo "                           name, removes the worktree you are in, or picks with fzf"
+    echo "                           name, removes the worktree you are in, or picks with fzf."
+    echo "                           Runs from the main checkout (the fish wrapper cds there first)"
+    echo "  main                     print the path of the main checkout"
+    echo "  current                  print the branch of the worktree you are in"
     echo "  --help, -h               show this message"
 end
 
@@ -93,6 +96,11 @@ function done_lines --description "'<branch>\t<branch>' for every worktree that 
             printf '%s\t%s\n' $branch $branch
         end
     end
+end
+
+function main_path --description "the path of the main checkout"
+    set -l records (worktree_records)
+    record_path $records[1]
 end
 
 function current_branch --description "the branch of the worktree we are in, unless that is the main checkout"
@@ -203,7 +211,24 @@ function cmd_done -a name
         or return 1
     end
 
+    cd (main_path)
+    or return 1
+
     exec workz done -d --cleanup-db $name
+end
+
+function cmd_main
+    require_repo
+    or return 1
+
+    main_path
+end
+
+function cmd_current
+    require_repo
+    or return 1
+
+    current_branch
 end
 
 switch "$argv[1]"
@@ -213,6 +238,10 @@ switch "$argv[1]"
         cmd_create $argv[2..-1]
     case done
         cmd_done $argv[2..-1]
+    case main
+        cmd_main
+    case current
+        cmd_current
     case -h --help
         usage
     case ''
