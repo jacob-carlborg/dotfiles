@@ -8,7 +8,11 @@
 # account file is found; add `~/.gh-account` for a default account.
 #
 # The account file is ignored when GH_TOKEN is already set and for `gh auth`
-# commands, which manage the stored accounts themselves.
+# commands, which manage the stored accounts themselves. The exception is
+# `gh auth token` without `--user`: it prints the token of the account from the
+# account file, when there is one, instead of the active account's. Tools that
+# call the GitHub API with that token themselves, such as Claude Code's PR
+# status, then see the same account as every other gh command here.
 
 set -eu
 
@@ -35,49 +39,83 @@ find_account_file() {
       printf '%s\n' "$dir/$account_file"
       return
     fi
-    if [ "$dir" = "$HOME" ] || [ "$dir" = / ]; then
+    if [ "$dir" = "${HOME:-}" ] || [ "$dir" = / ]; then
       return
     fi
     dir=$(dirname "$dir")
   done
 }
 
-# Prints the top-level gh command, skipping flags placed before it the way
-# cobra does: a `--flag` or `-f` without `=` takes the next argument as its
-# value, except the root's boolean flags.
-subcommand() {
+# Prints the account name from the account file, or nothing when there is no
+# account file. It's an error if the file is empty.
+account_name() {
+  file=$(find_account_file)
+  [ -n "$file" ] || return 0
+  account=$(head -n 1 "$file" | tr -d '[:space:]')
+  if [ -z "$account" ]; then
+    echo "gh wrapper: $file is empty" >&2
+    return 1
+  fi
+  printf '%s\n' "$account"
+}
+
+# Prints the nth command word, e.g. `token` for 2 and `gh auth token`, skipping
+# flags the way cobra does: a `--flag` or `-f` without `=` takes the next
+# argument as its value, except the root's boolean flags.
+command_word() {
+  n=$1
+  shift
   while [ $# -gt 0 ]; do
     case $1 in
       --) return ;;
       --help|--version|--*=*|-?=*) ;;
       --*|-?) shift ;;
       -*) ;;
-      *) printf '%s\n' "$1"; return ;;
+      *)
+        n=$((n - 1))
+        if [ "$n" -eq 0 ]; then
+          printf '%s\n' "$1"
+          return
+        fi
+        ;;
     esac
     [ $# -gt 0 ] && shift
   done
 }
 
+# Succeeds when the arguments pick an account with `--user` or `-u`, or end
+# their flags with `--`, after which an added `--user` would not be a flag.
+names_user() {
+  for arg; do
+    case $arg in
+      --|--user|--user=*|-u|-u?*) return 0 ;;
+    esac
+  done
+  return 1
+}
+
 gh=$(real_gh)
 
-if [ -n "${GH_TOKEN:-}" ] || [ "$(subcommand "$@")" = auth ]; then
+if [ -n "${GH_TOKEN:-}" ]; then
   exec "$gh" "$@"
 fi
 
-file=$(find_account_file)
-if [ -z "$file" ]; then
+if [ "$(command_word 1 "$@")" = auth ]; then
+  if [ "$(command_word 2 "$@")" = token ] && ! names_user "$@"; then
+    account=$(account_name)
+    [ -n "$account" ] && exec "$gh" "$@" --user "$account"
+  fi
+  exec "$gh" "$@"
+fi
+
+account=$(account_name)
+if [ -z "$account" ]; then
   echo "gh wrapper: no $account_file file found in $PWD or its parents" >&2
   exit 1
 fi
 
-account=$(head -n 1 "$file" | tr -d '[:space:]')
-if [ -z "$account" ]; then
-  echo "gh wrapper: $file is empty" >&2
-  exit 1
-fi
-
 if ! token=$("$gh" auth token --user "$account"); then
-  echo "gh wrapper: no token for account '$account' (from $file)" >&2
+  echo "gh wrapper: no token for account '$account' (from $(find_account_file))" >&2
   exit 1
 fi
 
