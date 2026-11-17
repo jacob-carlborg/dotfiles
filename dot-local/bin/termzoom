@@ -121,13 +121,10 @@ end
 
 set -l size (target_size $current $argv[1]); or exit 1
 
-if test "$size" = "$current"
-    echo $size
-    exit 0
+# cmux watches the Ghostty config and applies the new size to every pane by
+# itself, so no `cmux reload-config` (which it refuses from outside cmux).
+if test "$size" != "$current"
+    write_size $config $size; or exit 1
 end
 
-write_size $config $size
-and cmux reload-config >/dev/null
-and echo $size
-
-exit $status
+echo $size

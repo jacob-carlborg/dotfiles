@@ -5,12 +5,12 @@
     <key>Label</key>
     <string>local.termzoom-watch</string>
 
-    <!-- Through sh so $HOME expands; launchd's own PATH has neither fish nor cmux. -->
+    <!-- Through sh so $HOME expands; launchd's own PATH lacks fish. -->
     <key>ProgramArguments</key>
     <array>
         <string>/bin/sh</string>
         <string>-c</string>
-        <string>PATH="$HOME/.local/bin:/opt/homebrew/bin:/Applications/cmux.app/Contents/Resources/bin:/usr/bin:/bin:/usr/sbin" exec "$HOME/.local/bin/termzoom-watch" &gt;&gt;"$HOME/Library/Logs/termzoom-watch.log" 2&gt;&amp;1</string>
+        <string>PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin" exec "$HOME/.local/bin/termzoom-watch" &gt;&gt;"$HOME/Library/Logs/termzoom-watch.log" 2&gt;&amp;1</string>
     </array>
 
     <key>RunAtLoad</key>

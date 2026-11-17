@@ -1,8 +1,7 @@
 // Runs `termzoom auto` at start and whenever the connected screens change.
 // Built and started by `termzoom-watch`; see Library/LaunchAgents.
 
-import CoreGraphics
-import Foundation
+import AppKit
 
 /// Runs one command, coalescing a burst of requests into a single run once
 /// the requests have stopped for `delay` seconds.
@@ -40,20 +39,22 @@ final class DebouncedCommand {
     }
 }
 
-/// Calls `onChange` after each screen reconfiguration completes.
+/// Calls `onChange` whenever screens are added, removed or rearranged.
 final class ScreenWatcher {
+    private let notifications: NotificationCenter
     private let onChange: () -> Void
 
-    init(onChange: @escaping () -> Void) {
+    init(notifications: NotificationCenter = .default, onChange: @escaping () -> Void) {
+        self.notifications = notifications
         self.onChange = onChange
     }
 
     func start() {
-        let context = Unmanaged.passRetained(self).toOpaque()
-        CGDisplayRegisterReconfigurationCallback({ _, flags, context in
-            guard let context, !flags.contains(.beginConfigurationFlag) else { return }
-            Unmanaged<ScreenWatcher>.fromOpaque(context).takeUnretainedValue().onChange()
-        }, context)
+        notifications.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification,
+            object: nil,
+            queue: .main
+        ) { [onChange] _ in onChange() }
     }
 }
 
@@ -61,6 +62,10 @@ final class ScreenWatcher {
 // event, so wait for things to settle before looking.
 let termzoom = DebouncedCommand(arguments: ["termzoom", "auto"], delay: 3)
 ScreenWatcher(onChange: termzoom.request).start()
-
 termzoom.run()
-RunLoop.main.run()
+
+// macOS only delivers screen changes to a running application, not to a bare
+// run loop, so run as one: no Dock icon, no menu bar.
+let app = NSApplication.shared
+app.setActivationPolicy(.prohibited)
+app.run()
