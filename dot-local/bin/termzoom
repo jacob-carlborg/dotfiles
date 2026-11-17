@@ -1,0 +1,133 @@
+#!/usr/bin/env -S fish --no-config
+
+# --no-config: nothing here needs the interactive config, and skipping it keeps
+# an invocation fast. PATH is inherited from the calling shell.
+
+function usage
+    echo "usage: termzoom [auto | home | work | <size> | +<n> | -<n> | screens]"
+    echo ""
+    echo "Sets the terminal font size for every cmux pane, existing and new."
+    echo ""
+    echo "  (no argument)  print the current size"
+    echo "  auto           pick home or work from the connected screens"
+    echo "  home, work     set the size for that place"
+    echo "  <size>         set an absolute size, e.g. 12"
+    echo "  +<n>, -<n>     adjust the current size, e.g. +2"
+    echo "  screens        list the connected screens"
+    echo "  --help, -h     show this message"
+    echo ""
+    echo "Panes zoomed by hand with Cmd+/Cmd- keep their own size; press Cmd+0 in"
+    echo "them to make them follow this setting again."
+end
+
+# Font size per place. Ghostty's Cmd+ steps one point, so work is home + 2.
+function preset -a name
+    switch $name
+        case auto
+            preset (location)
+        case home
+            echo 10
+        case work
+            echo 12
+        case '*'
+            echo $name
+    end
+end
+
+# Home is when every connected screen is one of these; anything else is work.
+function location
+    set -l home_screens XB271HK "Color LCD"
+
+    for screen in (screens)
+        if not contains -- $screen $home_screens
+            echo work
+            return
+        end
+    end
+
+    echo home
+end
+
+function screens
+    system_profiler SPDisplaysDataType | string replace -rf '^ {8}(\S.*):$' '$1'
+end
+
+# The Ghostty config cmux reads; the macOS location wins over the XDG one.
+function config_path
+    set -l candidates \
+        "$HOME/Library/Application Support/com.mitchellh.ghostty/config" \
+        "$HOME/.config/ghostty/config"
+
+    for file in $candidates
+        if test -f $file; and string match -qr '^font-size\s*=' <$file
+            echo $file
+            return
+        end
+    end
+
+    for file in $candidates
+        test -f $file; and echo $file; and return
+    end
+
+    echo "termzoom: no Ghostty config found" >&2
+    return 1
+end
+
+# Ghostty's default on macOS when the config sets no size.
+function current_size -a config
+    set -l size (string replace -rf '^font-size\s*=\s*(\S+).*' '$1' <$config)[-1]
+    test -n "$size"; and echo $size; or echo 13
+end
+
+function target_size -a current requested
+    set -l size (preset $requested)
+
+    if not string match -qr '^[+-]?[0-9]+(\.[0-9]+)?$' -- $size
+        echo "termzoom: expected home, work, or a size like 12, +1 or -1, got '$requested'" >&2
+        return 1
+    end
+
+    if string match -qr '^[+-]' -- $size
+        math "max(1, $current + ($size))"
+    else
+        echo $size
+    end
+end
+
+function write_size -a config size
+    if string match -qr '^font-size\s*=' <$config
+        sed -i '' -E "s/^font-size[[:space:]]*=.*/font-size = $size/" $config
+    else
+        echo "font-size = $size" >>$config
+    end
+end
+
+switch "$argv[1]"
+    case -h --help
+        usage
+        exit 0
+    case screens
+        screens
+        exit $status
+end
+
+set -l config (config_path); or exit 1
+set -l current (current_size $config)
+
+if test (count $argv) -eq 0
+    echo $current
+    exit 0
+end
+
+set -l size (target_size $current $argv[1]); or exit 1
+
+if test "$size" = "$current"
+    echo $size
+    exit 0
+end
+
+write_size $config $size
+and cmux reload-config >/dev/null
+and echo $size
+
+exit $status

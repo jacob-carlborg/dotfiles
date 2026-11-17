@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Runs the screen watcher that keeps `termzoom auto` in sync with the
+# connected screens. Compiles it on first run and after each edit, so no
+# binary lives in the dotfiles and no Swift interpreter stays resident.
+
+set -e
+
+source="$HOME/.local/share/termzoom/watch.swift"
+binary="${XDG_CACHE_HOME:-$HOME/.cache}/termzoom/watch"
+
+if [ ! -x "$binary" ] || [ "$source" -nt "$binary" ]; then
+    mkdir -p "$(dirname "$binary")"
+    swiftc -O -o "$binary" "$source"
+fi
+
+exec "$binary"
