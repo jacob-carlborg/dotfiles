@@ -55,3 +55,6 @@ fileType = source.d
 
 [*.dt]
 fileType = source.dtrace
+
+[actions.lock]
+fileType = source.yaml
