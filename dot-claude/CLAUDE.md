@@ -32,6 +32,12 @@ automatically when you touch matching files:
 If one of these has not loaded by the time you edit matching code, read it
 first.
 
+### Comments
+
+When code seems to need a comment explaining why, treat that as a sign of a
+workaround: look for the straightforward version that needs no explanation
+first. A comment that justifies a workaround is a fig leaf, not permission.
+
 ### Self-review before presenting code (mandatory)
 
 Well-designed code rarely comes out right in a single pass, but it is easy to
