@@ -25,4 +25,8 @@ For each comment, give your opinion on which alternative fits:
 
 Keep a comment only when none of these fit, and say why.
 
+Number the findings sequentially, starting at 1, one number per comment, so I
+can refer to them by number (e.g. "apply 1, 3 and 5"). Give each finding's
+`file:line`, the comment, the chosen alternative, and the reasoning.
+
 Do not edit anything. Present the opinions and let me choose what to apply.
