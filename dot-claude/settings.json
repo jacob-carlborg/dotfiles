@@ -71,7 +71,6 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "datadog@claude-plugins-official": true,
     "mattpocock@dotfiles": true
   },
   "extraKnownMarketplaces": {
